@@ -7,12 +7,11 @@ class Entity:
         self.y = y
         self.name = name
         self.hp = hp
-        self.width = 50
-        self.height = 50
+        self.width = width
+        self.height = height
 
     def draw(self, master, offsetx, offsety):
-        pg.draw.rect(master, WHITE, (self.x+offsetx-self.width//2, self.y+offsety-self.height//2, self.width, self.height))
-        print(self.x+offsetx, self.y+offsety)
+        pg.draw.rect(master, WHITE, (self.x-offsetx-self.width//2, self.y-offsety-self.height//2, self.width, self.height))
 
 class Player(Entity):
     def __init__(self, name, hp, x, y):
@@ -22,5 +21,13 @@ class Player(Entity):
         pass
 
 class Enemy(Entity):
+    def __init__(self, name, hp, x, y):
+        super().__init__(x, y, name, hp)
+
+class Passive(Entity):
+    def __init__(self, name, hp, x, y):
+        super().__init__(x, y, name, hp)
+
+class Block():
     def __init__(self, name, hp, x, y):
         super().__init__(x, y, name, hp)

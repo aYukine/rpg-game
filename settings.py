@@ -1,5 +1,8 @@
-screenx = 1600
+screenx = 1200
 screeny = 800
+
+width = screenx//24
+height = width
 
 # color
 
@@ -11,4 +14,5 @@ BLUE = (0, 0, 255)
 
 
 # player
-player_speed = 10
+player_speed = 200
+player_starting = (6, 21)
