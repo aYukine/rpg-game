@@ -15,4 +15,7 @@ BLUE = (0, 0, 255)
 
 # player
 player_speed = 200
-player_starting = (6, 21)
+player_starting = (14, 21)
+
+# bullet
+bullet_speed = 500

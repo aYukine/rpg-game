@@ -16,3 +16,12 @@ def map_reader(filename):
         for row in reader:
             map.append([int(cell) for cell in row])
     return map
+
+def find_bullet_vector(px, py, mx, my):
+    dx = mx - px
+    dy = my - py
+    distance = (dx**2 + dy**2)**0.5
+    return (dx/distance, dy/distance)
+
+def distant_from_player(x, y, px, py):
+    return ((x-px)**2 + (y-py)**2)**0.5
