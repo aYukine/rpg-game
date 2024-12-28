@@ -1,5 +1,6 @@
 import pygame
 import csv
+from resource_loader import block_decoder
 
 def write(master, color, text, x, y, pos, size):
     font = pygame.font.Font(None, size)
@@ -10,12 +11,23 @@ def write(master, color, text, x, y, pos, size):
         master.blit(font.render(str(text), True, color), (x-(width/2), y-(height/2)))
 
 def map_reader(filename):
+    map_tiles = []
     with open(filename, "r") as f:
         reader = csv.reader(f)
-        map = []
         for row in reader:
-            map.append([int(cell) for cell in row])
-    return map
+            map_tiles.append([int(cell) for cell in row])
+    rows = len(map_tiles)
+    cols = len(map_tiles[0]) if rows else 0
+    tile_width = tile_height = 50
+    map_surface = pygame.Surface((cols * tile_width, rows * tile_height)).convert()
+
+    for i, row in enumerate(map_tiles):
+        for j, cell in enumerate(row):
+            block = block_decoder.get(cell)
+            if block:
+                map_surface.blit(block, (j * tile_width, i * tile_height))
+
+    return map_surface
 
 def find_bullet_vector(px, py, mx, my):
     dx = mx - px

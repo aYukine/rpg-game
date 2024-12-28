@@ -1,14 +1,16 @@
 import pygame as pg
 
 # tiles
-grass = pg.image.load("resource/tiles/grass.png")
-stone = pg.image.load("resource/tiles/stone.png")
+
+block_decoder = {}
 
 
-block_decoder = {1:grass, 2:stone}
-
-
-def convert_images():
-    global grass, stone
-    grass = grass.convert_alpha()
-    stone = stone.convert_alpha()
+def load_data():
+    grass = pg.image.load("resource/tiles/grass.png")
+    stone = pg.image.load("resource/tiles/stone.png")
+    
+    block_decoder[1] = grass
+    block_decoder[2] = stone
+    
+    grass = grass.convert()
+    stone = stone.convert()
