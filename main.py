@@ -6,6 +6,7 @@ import time
 from resource_loader import *
 import threading
 import time
+import random
 
 pg.init()
 
@@ -16,7 +17,7 @@ class Game():
         self.offset_x = -screenx//2
         self.offset_y = -screeny//2
         self.run = True
-        self.player = entity.Player("Player", 200, 0, 0)
+        self.player = entity.Player("Player", 200, 0, 0, self.offset_x, self.offset_y)
         self.current_time = time.perf_counter()
         self.map = None
         self.map_offsetx = (player_starting[0]-1)*width
@@ -25,14 +26,20 @@ class Game():
         self.enemies = []
 
         self.loaded = False
-        
-        self.enemies.append(entity.Enemy("Enemy", 100, 100, 100))
         self.start = False
+
+
+    def random_spawn_enemy(self):
+        a = random.randint(0, 300)
+        if a == 50 and len(self.enemies) < 10:
+            x = random.randint(int(self.player.x-1000), int(self.player.x+1000))
+            y = random.randint(int(self.player.y-1000), int(self.player.y+1000))
+            if utils.distant_from_player(x, y, self.player.x, self.player.y) > 500:
+                self.enemies.append(entity.Enemy("Enemy", 100, x, y, self.offset_x, self.offset_y))
 
     def load_game(self):
         load_data()
         self.map = utils.map_reader("resource/map.csv")
-        time.sleep(5)
         self.loaded = True
 
     def controller_handle(self, dt, key, mouse):
@@ -50,21 +57,27 @@ class Game():
         if press[pg.K_d]:
             x += dt*player_speed
         
-        self.player.move(x, y, self.offset_x, self.offset_y)
+        self.player.move(x, y)
         self.update_global_xy()
 
     def handle_games(self, dt, key, mouse):
         self.controller_handle(dt, key, mouse)
+        self.random_spawn_enemy()
+        self.player.process(dt)
         for p in self.projectiles:
             p.move(dt)
 
         for e in self.enemies:
+            e.process(dt)
             if utils.distant_from_player(e.x, e.y, self.player.x, self.player.y) < 400:
-                e.move((self.player.x - e.x) * dt, (self.player.y - e.y) * dt, self.offset_x, self.offset_y)
+                e.move((self.player.x - e.x) * dt, (self.player.y - e.y) * dt)
             for p in self.projectiles:
                 if e.rect.colliderect(pg.Rect(p.x-self.offset_x-5, p.y-self.offset_y-5, 10, 10)):
                     e.hp -= 10
                     self.projectiles.remove(p)
+
+            if e.rect.colliderect(self.player.rect):
+                self.player.take_damage(10)
             if e.hp <= 0:
                 self.enemies.remove(e)
         

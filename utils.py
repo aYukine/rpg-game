@@ -23,6 +23,7 @@ def map_reader(filename):
 
     for i, row in enumerate(map_tiles):
         for j, cell in enumerate(row):
+            
             block = block_decoder.get(cell)
             if block:
                 map_surface.blit(block, (j * tile_width, i * tile_height))
