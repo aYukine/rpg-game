@@ -24,10 +24,12 @@ class Game():
         self.map_offsety = (player_starting[1]-1)*height
         self.projectiles = []
         self.enemies = []
+        self.progress = 0
 
         self.loaded = False
         self.start = False
         self.menu_option = 0
+        self.current_screen = 0
         self.player_inventory = {}
         self.player_coins = 100 
 
@@ -42,9 +44,13 @@ class Game():
 
     def load_game(self):
         load_data()
+        self.progress = 30
         self.map = utils.map_reader("resource/map.csv")
+        self.progress = 60
         time.sleep(2)
-        self.loaded = True
+        self.progress = 90
+        time.sleep(2)
+        self.progress = 100
 
     def controller_handle(self, dt, key, mouse):
         mx, my = pg.mouse.get_pos()
@@ -127,122 +133,51 @@ class Game():
         self.screen.fill(BLACK)
         if not self.loaded:
             utils.write(self.screen, WHITE, "Loading...", screenx//2, screeny//2, "MIDDLE", 30)
+            pg.draw.line(self.screen, WHITE, (screenx//2-100, screeny//2+100), (screenx//2-100+self.progress*2, screeny//2+100), 10)
+            if self.progress == 100 and key == pg.K_RETURN:
+                self.loaded = True
         else:
-            font_title = pg.font.Font(None, 60)
-            font_options = pg.font.Font(None, 40)
+            if self.current_screen == 0:
 
-            title_surface = font_title.render("RPG Game", True, WHITE)
-            title_rect = title_surface.get_rect(center=(screenx // 2, screeny // 4))
-            self.screen.blit(title_surface, title_rect)
+                font_title = pg.font.Font(None, 60)
+                font_options = pg.font.Font(None, 40)
 
-            options = ["Start Game", "Help","Shop","Inventory","Quit"]
-            for i, option in enumerate(options):
-                color = WHITE if i == self.menu_option else GREY
-                option_surface = font_options.render(option, True, color)
-                option_rect = option_surface.get_rect(center=(screenx // 2, screeny // 2 + i * 50))
-                self.screen.blit(option_surface, option_rect)
-            if key == pg.K_UP:
-                self.menu_option = (self.menu_option - 1) % len(options)  
-            elif key == pg.K_DOWN:
-                self.menu_option = (self.menu_option + 1) % len(options)  
-            elif key == pg.K_RETURN: 
-                if self.menu_option == 0:
-                    self.start = True
-                elif self.menu_option == 1:  
-                    self.show_help()
-                elif self.menu_option == 2:  
-                    self.show_shop()
-                elif self.menu_option == 3:
-                    self.show_inventory()
-                elif self.menu_option == 4:
-                    self.run = False
+                title_surface = font_title.render("RPG Game", True, WHITE)
+                title_rect = title_surface.get_rect(center=(screenx // 2, screeny // 4))
+                self.screen.blit(title_surface, title_rect)
+
+                options = ["Start Game", "Help","Quit"]
+                for i, option in enumerate(options):
+                    color = WHITE if i == self.menu_option else GREY
+                    option_surface = font_options.render(option, True, color)
+                    option_rect = option_surface.get_rect(center=(screenx // 2, screeny // 2 + i * 50))
+                    self.screen.blit(option_surface, option_rect)
+                if key == pg.K_UP:
+                    self.menu_option = (self.menu_option - 1) % len(options)  
+                elif key == pg.K_DOWN:
+                    self.menu_option = (self.menu_option + 1) % len(options)  
+                elif key == pg.K_RETURN: 
+                    if self.menu_option == 0:
+                        self.start = True
+                    elif self.menu_option == 1:  
+                        self.current_screen = 1
+                    elif self.menu_option == 2:
+                        self.run = False
+                        
+            elif self.current_screen == 1:
+                self.show_help(key)
 
         pg.display.flip()
 
 
     def show_shop(self):
-        showing_shop = True
-        font = pg.font.Font(None, 40)
-
-        shop_items = [
-            {"name": "Health Position", "price": 10},
-            {"name": "Mana Position" , "price": 15},
-            {"name": "Sword Upgrade", "price": 50},
-        ]
-
-        while showing_shop:
-            self.screen.fill(BLACK)
-
-            title_surface = font.render("===Shop===", True, WHITE)
-            title_rect = title_surface.get_rect(center=(screenx //2, screeny//6))
-            self.screen.blit(title_surface, title_rect)
-
-            for i, item in enumerate(shop_items):
-                color = WHITE if i == self.menu_option else GREY
-                item_surface = font.render(f"{item['name']} - {item['price']} coins", True, color)
-                item_rect = item_surface.get_rect(center=(screenx // 2, screeny // 3 + i * 50))
-                self.screen.blit(item_surface, item_rect)
-
-            coins_surface = font.render(f"Coins: {self.player_coins}", True, WHITE)
-            coins_rect = coins_surface.get_rect(center=(screenx // 2, screeny - 50))
-            self.screen.blit(coins_surface, coins_rect)
-
-            pg.display.flip()
-
-            for event in pg.event.get():
-                if event.type == pg.QUIT:
-                    self.run = False
-                    showing_shop = False
-                elif event.type == pg.KEYDOWN:
-                    if event.key == pg.K_UP:
-                        self.menu_option = (self.menu_option - 1) % len(shop_items)
-                    elif event.key == pg.K_DOWN:
-                        self.menu_option = (self.menu_option + 1) % len(shop_items)
-                    elif event.key == pg.K_RETURN:
-                        selected_item = shop_items[self.menu_option]
-                        if self.player_coins >= selected_item["price"]:
-                            self.player_coins -= selected_item["price"]
-                        
-                        item_name = selected_item["name"]
-                        if item_name in self.player_inventory:
-                            self.player_inventory[item_name] += 1
-                        else:
-                            self.player_inventory[item_name] = 1
-                        print(f"Bought {item_name}! Inventory: {self.player_inventory}")
-                    else:
-                        print("Not enough coins!")
-                elif event.key == pg.K_ESCAPE:
-                    showing_shop = False
+        pass
 
     def show_inventory(self):
-        showing_inventory = True
-        font = pg.font.Font(None, 40)
-
-        while showing_inventory:
-            self.screen.fill(BLACK)
-
-            title_surface = font.render("=== Inventory ===", True, WHITE)
-            title_rect = title_surface.get_rect(center=(screenx // 2, screeny // 6))
-            self.screen.blit(title_surface, title_rect)
-
-            for i, (item_name, count) in enumerate(self.player_inventory.items()):
-               item_surface = font.render(f"{item_name}: {count}", True, WHITE)
-               item_rect = item_surface.get_rect(center=(screenx // 2, screeny // 3 + i * 40))
-               self.screen.blit(item_surface, item_rect)
-
-            pg.display.flip()
-        
-            for event in pg.event.get():
-                if event.type == pg.QUIT:
-                   self.run = False
-                   showing_inventory = False
-                elif event.type == pg.KEYDOWN:
-                    if event.key == pg.K_RETURN:  
-                       showing_inventory = False
+        pass
 
                             
-    def show_help(self):
-        showing_help = True
+    def show_help(self, key):
         font = pg.font.Font(None, 40)
         lines = [
         "=== Help ===",
@@ -250,21 +185,12 @@ class Game():
         "Use the mouse to aim and left-click to shoot.",
         "Press ENTER to return to the main menu.",
         ]
-        while showing_help:
-            self.screen.fill(BLACK)
-            for i, line in enumerate(lines):
-                text_surface = font.render(line, True, WHITE)
-                text_rect = text_surface.get_rect(center=(screenx // 2, screeny // 3 + i * 40))
-                self.screen.blit(text_surface, text_rect)
-            pg.display.flip()
-            for event in pg.event.get():
-                if event.type == pg.QUIT: 
-                   self.run = False
-                   showing_help = False
-                elif event.type == pg.KEYDOWN:
-                    if event.key == pg.K_RETURN:
-                        showing_help = False
-
+        for i, line in enumerate(lines):
+            text_surface = font.render(line, True, WHITE)
+            text_rect = text_surface.get_rect(center=(screenx // 2, screeny // 3 + i * 40))
+            self.screen.blit(text_surface, text_rect)
+        if key == pg.K_ESCAPE:
+            self.current_screen = 0
         pg.display.flip()
 
     def mainloop(self):

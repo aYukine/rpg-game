@@ -2,7 +2,7 @@ import pygame
 import csv
 from resource_loader import block_decoder
 
-def write(master, color, text, x, y, pos, size):
+def write(master, color, text, x, y, pos, size=10):
     font = pygame.font.Font(None, size)
     if pos == "TOPLEFT":
         master.blit(font.render(str(text), True, color), (x, y))
