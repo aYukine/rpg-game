@@ -4,76 +4,117 @@ import utils
 import entity
 import time
 from resource_loader import *
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-GREY = (169, 169, 169)
+import threading
+import time
+import random
+
 pg.init()
 
 class Game():
     def __init__(self):
         self.screen = pg.display.set_mode((screenx, screeny))
-        convert_images()
         self.clock = pg.time.Clock()
         self.offset_x = -screenx//2
         self.offset_y = -screeny//2
         self.run = True
-        self.player = entity.Player("Player", 200, 0, 0)
-        self.enemy = entity.Enemy("Enemy", 100, 100, 100)
+        self.player = entity.Player("Player", 200, 0, 0, self.offset_x, self.offset_y)
         self.current_time = time.perf_counter()
-        self.map = utils.map_reader("resource/map.csv")
+        self.map = None
         self.map_offsetx = (player_starting[0]-1)*width
         self.map_offsety = (player_starting[1]-1)*height
         self.projectiles = []
+        self.enemies = []
+
+        self.loaded = False
         self.start = False
         self.menu_option = 0
         self.player_inventory = {}
         self.player_coins = 100 
 
+
+    def random_spawn_enemy(self):
+        a = random.randint(0, 300)
+        if a == 50 and len(self.enemies) < 10:
+            x = random.randint(int(self.player.x-1000), int(self.player.x+1000))
+            y = random.randint(int(self.player.y-1000), int(self.player.y+1000))
+            if utils.distant_from_player(x, y, self.player.x, self.player.y) > 500:
+                self.enemies.append(entity.Enemy("Enemy", 100, x, y, self.offset_x, self.offset_y))
+
+    def load_game(self):
+        load_data()
+        self.map = utils.map_reader("resource/map.csv")
+        self.loaded = True
+
     def controller_handle(self, dt, key, mouse):
         mx, my = pg.mouse.get_pos()
+        x, y = 0, 0
         if mouse:
             self.projectiles.append(entity.Bullets(self.player.x, self.player.y, utils.find_bullet_vector(self.player.x, self.player.y, mx+self.offset_x, my+self.offset_y)))
         press = pg.key.get_pressed()
         if press[pg.K_w]:
-            self.player.y -= dt*player_speed
+            y -= dt*player_speed
         if press[pg.K_s]:
-            self.player.y += dt*player_speed
+            y += dt*player_speed
         if press[pg.K_a]:
-            self.player.x -= dt*player_speed
+            x -= dt*player_speed
         if press[pg.K_d]:
-            self.player.x += dt*player_speed
-
+            x += dt*player_speed
+        
+        self.player.move(x, y)
         self.update_global_xy()
 
     def handle_games(self, dt, key, mouse):
         self.controller_handle(dt, key, mouse)
+        self.random_spawn_enemy()
+        self.player.process(dt)
         for p in self.projectiles:
             p.move(dt)
+
+        for e in self.enemies:
+            e.process(dt)
+            if utils.distant_from_player(e.x, e.y, self.player.x, self.player.y) < 400:
+                e.move((self.player.x - e.x) * dt, (self.player.y - e.y) * dt)
+            for p in self.projectiles:
+                if e.rect.colliderect(pg.Rect(p.x-self.offset_x-5, p.y-self.offset_y-5, 10, 10)):
+                    e.hp -= 10
+                    self.projectiles.remove(p)
+
+            if e.rect.colliderect(self.player.rect):
+                self.player.take_damage(10)
+            if e.hp <= 0:
+                self.enemies.remove(e)
         
     def update_global_xy(self): 
         self.offset_x = self.player.x - screenx//2
         self.offset_y = self.player.y - screeny//2
 
-    
-    def map_builder_old(self):
-        for i, row in enumerate(self.map):
-            for j, block in enumerate(row):
-                self.screen.blit(block_decoder[block], (j*width-width//2-self.offset_x-self.map_offsetx, i*height-height//2-self.offset_y-self.map_offsety))
-
     def map_builder(self):
-        for i in range(int(self.player.y//height + player_starting[1] - 12), int(self.player.y//height + player_starting[1] + 12)):
-            if i > len(self.map)-1 or i < 0:
-                continue
-            for j in range(int(self.player.x//width + player_starting[0] - 12), int(self.player.x//width + player_starting[0] + 12)):
-                if j > len(self.map[i])-1 or j < 0:
-                    continue
-                self.screen.blit(block_decoder[self.map[i][j]], (j*width-width//2-self.offset_x-self.map_offsetx, i*height-height//2-self.offset_y-self.map_offsety))
+        pass
+        # start_y = int(self.player.y // height + player_starting[1] - 4)
+        # end_y = int(self.player.y // height + player_starting[1] + 4)
+        # start_x = int(self.player.x // width + player_starting[0] - 4)
+        # end_x = int(self.player.x // width + player_starting[0] + 4)
+
+        # offset_x = self.offset_x + self.map_offsetx
+        # offset_y = self.offset_y + self.map_offsety
+        # half_width = width // 2
+        # half_height = height // 2
+
+        # for i in range(start_y, end_y):
+        #     if 0 <= i < len(self.map):
+        #         for j in range(start_x, end_x):
+        #             if 0 <= j < len(self.map[i]):
+        #                 block = block_decoder.get(self.map[i][j])
+        #                 if block:
+        #                     self.screen.blit(block, (j * width - half_width - offset_x, i * height - half_height - offset_y))
 
     def draw(self):
         self.screen.fill(BLACK)
+        self.screen.blit(self.map, (-self.map_offsetx-self.offset_x, -self.map_offsety-self.offset_y))
         self.map_builder()
         self.player.draw(self.screen, self.offset_x, self.offset_y)
-        self.enemy.draw(self.screen, self.offset_x, self.offset_y)
+        for e in self.enemies:
+            e.draw(self.screen, self.offset_x, self.offset_y)
         utils.write(self.screen, WHITE, f"x: {self.player.x/width:.2f}, y: {self.player.y/width:.2f}", 10, 20, "TOPLEFT", 30)
         for p in self.projectiles:
             if utils.distant_from_player(p.x, p.y, self.player.x, self.player.y) > 1000:
@@ -82,7 +123,12 @@ class Game():
         pg.display.flip()
 
     def menu(self, key):
-        if key == pg.K_SPACE:
+        self.screen.fill(BLACK)
+        if not self.loaded:
+            utils.write(self.screen, WHITE, "Loading...", screenx//2, screeny//2, "MIDDLE", 30)
+        else:
+            utils.write(self.screen, WHITE, "Press SPACE to start", screenx//2, screeny//2, "MIDDLE", 30)
+        if key == pg.K_SPACE and self.loaded:
             self.start = True
         self.screen.fill(BLACK)
         font_title = pg.font.Font(None, 60)
@@ -227,11 +273,17 @@ class Game():
                     if event.key == pg.K_RETURN:
                         showing_help = False
 
+        pg.display.flip()
+
     def mainloop(self):
+        loader = threading.Thread(target=self.load_game)
+        loader.daemon = True
+        loader.start()
         while self.run:
             key = None
             mouse = False
             dt = time.perf_counter() - self.current_time
+            print(self.clock.get_fps())
             self.current_time = time.perf_counter()
             self.clock.tick(60)
 
@@ -246,6 +298,7 @@ class Game():
             if self.start == False:
                 self.menu(key)
                 continue
+
             self.handle_games(dt, key, mouse)
             self.draw()
             

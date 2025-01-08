@@ -4,31 +4,47 @@ from settings import *
 
 # entity
 class Entity:
-    def __init__(self, x, y, name, hp):
+    def __init__(self, x, y, name, hp, offsetx, offsety):
         self.x = x
         self.y = y
         self.name = name
+        self.max_hp = hp
         self.hp = hp
         self.width = width
         self.height = height
+        self.rect = pg.Rect(self.x-offsetx-self.width//2, self.y-offsety-self.height//2, self.width, self.height)
+        self.invincibility = 1
+        self.invincibility_cooldown = 1
 
     def draw(self, master, offsetx, offsety):
+        self.rect = pg.Rect(self.x-offsetx-self.width//2, self.y-offsety-self.height//2, self.width, self.height)
+        pg.draw.rect(master, WHITE, (self.x-offsetx-self.width//2, self.y-offsety-self.height, self.width, 10))
+        pg.draw.rect(master, RED, (self.x-offsetx-self.width//2+2, self.y-offsety-self.height+1, self.width*(self.hp/self.max_hp)-4, 8))
         pg.draw.rect(master, WHITE, (self.x-offsetx-self.width//2, self.y-offsety-self.height//2, self.width, self.height))
 
-class Player(Entity):
-    def __init__(self, name, hp, x, y):
-        super().__init__(x, y, name, hp)
+    def move(self, x, y):
+        self.x += x
+        self.y += y
 
-    def shoot():
-        pass
+    def take_damage(self, damage):
+        if self.invincibility <= 0:
+            self.hp -= 10
+            self.invincibility = self.invincibility_cooldown
+
+    def process(self, dt):
+        self.invincibility -= dt
+
+class Player(Entity):
+    def __init__(self, name, hp, x, y, offsetx, offsety):
+        super().__init__(x, y, name, hp, offsetx, offsety)
 
 class Enemy(Entity):
-    def __init__(self, name, hp, x, y):
-        super().__init__(x, y, name, hp)
+    def __init__(self, name, hp, x, y, offsetx, offsety):
+        super().__init__(x, y, name, hp, offsetx, offsety)
 
 class Passive(Entity):
-    def __init__(self, name, hp, x, y):
-        super().__init__(x, y, name, hp)
+    def __init__(self, name, hp, x, y, offsetx, offsety):
+        super().__init__(x, y, name, hp, offsetx, offsety)
 
 class Projectile:
     def __init__(self, x, y, vector):
