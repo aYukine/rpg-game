@@ -30,6 +30,9 @@ def map_reader(filename):
 
     return map_surface
 
+def new_map_reader(filename):
+    pass
+
 def find_bullet_vector(px, py, mx, my):
     dx = mx - px
     dy = my - py

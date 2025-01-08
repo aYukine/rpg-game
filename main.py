@@ -43,6 +43,7 @@ class Game():
     def load_game(self):
         load_data()
         self.map = utils.map_reader("resource/map.csv")
+        time.sleep(2)
         self.loaded = True
 
     def controller_handle(self, dt, key, mouse):
@@ -127,44 +128,38 @@ class Game():
         if not self.loaded:
             utils.write(self.screen, WHITE, "Loading...", screenx//2, screeny//2, "MIDDLE", 30)
         else:
-            utils.write(self.screen, WHITE, "Press SPACE to start", screenx//2, screeny//2, "MIDDLE", 30)
-        if key == pg.K_SPACE and self.loaded:
-            self.start = True
-        self.screen.fill(BLACK)
-        font_title = pg.font.Font(None, 60)
-        font_options = pg.font.Font(None, 40)
+            font_title = pg.font.Font(None, 60)
+            font_options = pg.font.Font(None, 40)
 
-    
-        title_surface = font_title.render("RPG Game", True, WHITE)
-        title_rect = title_surface.get_rect(center=(screenx // 2, screeny // 4))
-        self.screen.blit(title_surface, title_rect)
+            title_surface = font_title.render("RPG Game", True, WHITE)
+            title_rect = title_surface.get_rect(center=(screenx // 2, screeny // 4))
+            self.screen.blit(title_surface, title_rect)
 
-    
-        options = ["Start Game", "Help","Shop","Inventory","Quit"]
-        for i, option in enumerate(options):
-            color = WHITE if i == self.menu_option else GREY
-            option_surface = font_options.render(option, True, color)
-            option_rect = option_surface.get_rect(center=(screenx // 2, screeny // 2 + i * 50))
-            self.screen.blit(option_surface, option_rect)
+            options = ["Start Game", "Help","Shop","Inventory","Quit"]
+            for i, option in enumerate(options):
+                color = WHITE if i == self.menu_option else GREY
+                option_surface = font_options.render(option, True, color)
+                option_rect = option_surface.get_rect(center=(screenx // 2, screeny // 2 + i * 50))
+                self.screen.blit(option_surface, option_rect)
+            if key == pg.K_UP:
+                self.menu_option = (self.menu_option - 1) % len(options)  
+            elif key == pg.K_DOWN:
+                self.menu_option = (self.menu_option + 1) % len(options)  
+            elif key == pg.K_RETURN: 
+                if self.menu_option == 0:
+                    self.start = True
+                elif self.menu_option == 1:  
+                    self.show_help()
+                elif self.menu_option == 2:  
+                    self.show_shop()
+                elif self.menu_option == 3:
+                    self.show_inventory()
+                elif self.menu_option == 4:
+                    self.run = False
 
         pg.display.flip()
 
-    
-        if key == pg.K_UP:
-           self.menu_option = (self.menu_option - 1) % len(options)  
-        elif key == pg.K_DOWN:
-           self.menu_option = (self.menu_option + 1) % len(options)  
-        elif key == pg.K_RETURN: 
-            if self.menu_option == 0:  
-               self.start = True
-            elif self.menu_option == 1:  
-               self.show_help()
-            elif self.menu_option == 2:  
-               self.show_shop()
-            elif self.menu_option == 3:
-                self.show_inventory()
-            elif self.menu_option == 4:
-                self.run = False
+
     def show_shop(self):
         showing_shop = True
         font = pg.font.Font(None, 40)
@@ -226,19 +221,16 @@ class Game():
         while showing_inventory:
             self.screen.fill(BLACK)
 
-        
             title_surface = font.render("=== Inventory ===", True, WHITE)
             title_rect = title_surface.get_rect(center=(screenx // 2, screeny // 6))
             self.screen.blit(title_surface, title_rect)
 
-        
             for i, (item_name, count) in enumerate(self.player_inventory.items()):
                item_surface = font.render(f"{item_name}: {count}", True, WHITE)
                item_rect = item_surface.get_rect(center=(screenx // 2, screeny // 3 + i * 40))
                self.screen.blit(item_surface, item_rect)
 
             pg.display.flip()
-
         
             for event in pg.event.get():
                 if event.type == pg.QUIT:
