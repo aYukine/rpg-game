@@ -1,3 +1,4 @@
+from email.mime import image
 import pygame as pg
 from settings import *
 import utils
@@ -32,6 +33,9 @@ class Game():
         self.current_screen = 0
         self.player_inventory = {}
         self.player_coins = 100 
+        self.image = pg.image.load("resource/img/background.png")
+       
+        
 
 
     def random_spawn_enemy(self):
@@ -130,44 +134,92 @@ class Game():
         pg.display.flip()
 
     def menu(self, key):
-        self.screen.fill(BLACK)
+        self.screen.blit(self.image, (0, 0))
         if not self.loaded:
-            utils.write(self.screen, WHITE, "Loading...", screenx//2, screeny//2, "MIDDLE", 30)
-            pg.draw.line(self.screen, WHITE, (screenx//2-100, screeny//2+100), (screenx//2-100+self.progress*2, screeny//2+100), 10)
-            if self.progress == 100 and key == pg.K_RETURN:
-                self.loaded = True
+            
+            font = pg.font.Font("resource/font/LilitaOne-Regular.ttf", 40)
+            loading_text = font.render("Loading...", True, WHITE)
+            text_rect = loading_text.get_rect(center=(screenx // 2, screeny // 2 - 50))
+            self.screen.blit(loading_text, text_rect)
+
+            
+            bar_width = 400
+            bar_height = 40
+            border_thickness = 4
+            border_radius = 10
+            bar_x = (screenx - bar_width) // 2
+            bar_y = (screeny - bar_height) // 2 + 50
+
+            pg.draw.rect(self.screen, WHITE, #ot ban hav function load-game mok mix k vea can work
+                 (bar_x - border_thickness, bar_y - border_thickness, 
+                  bar_width + border_thickness * 2, bar_height + border_thickness * 2), 
+                 border_radius=border_radius)
+
+            pg.draw.rect(self.screen, Light_Blue, 
+                 (bar_x, bar_y, bar_width, bar_height), 
+                 border_radius=border_radius)
+
+            pg.draw.rect(self.screen, WHITE, 
+                 (bar_x, bar_y, bar_width * (self.progress / 100), bar_height), 
+                 border_radius=border_radius)
+
+            if self.progress == 100:
+                for event in pg.event.get():
+                    if event.type == pg.KEYDOWN and event.key == pg.K_RETURN:
+                        self.loaded = True
+                    elif event.type == pg.MOUSEBUTTONDOWN:
+                        self.loaded = True
+
+
         else:
             if self.current_screen == 0:
-
-                font_title = pg.font.Font(None, 60)
-                font_options = pg.font.Font(None, 40)
+                font_title = pg.font.Font("resource/font/LilitaOne-Regular.ttf", 100)
+                font_options = pg.font.Font("resource/font/LilitaOne-Regular.ttf", 40)
 
                 title_surface = font_title.render("RPG Game", True, WHITE)
-                title_rect = title_surface.get_rect(center=(screenx // 2, screeny // 4))
+                title_rect = title_surface.get_rect(center=(screenx // 2, screeny // 2.7))
                 self.screen.blit(title_surface, title_rect)
 
-                options = ["Start Game", "Help","Quit"]
+                options = ["Start Game", "Help", "Quit"]
+                option_rects = []
+
                 for i, option in enumerate(options):
-                    color = WHITE if i == self.menu_option else GREY
+                    color = Light_Blue if i == self.menu_option else WHITE
                     option_surface = font_options.render(option, True, color)
-                    option_rect = option_surface.get_rect(center=(screenx // 2, screeny // 2 + i * 50))
+                    option_rect = option_surface.get_rect(center=(screenx // 2, screeny // 2 + i * 70))
                     self.screen.blit(option_surface, option_rect)
+                    option_rects.append(option_rect)
+
+                mouse_pos = pg.mouse.get_pos()  
+                mouse_clicked = pg.mouse.get_pressed()[0]  
+
+                for i, rect in enumerate(option_rects):
+                    if rect.collidepoint(mouse_pos):  
+                        self.menu_option = i 
+                        if mouse_clicked:  
+                            if self.menu_option == 0:
+                                self.start = True
+                            elif self.menu_option == 1:
+                                self.current_screen = 1
+                            elif self.menu_option == 2:
+                                self.run = False
+
                 if key == pg.K_UP:
-                    self.menu_option = (self.menu_option - 1) % len(options)  
+                    self.menu_option = (self.menu_option - 1) % len(options)
                 elif key == pg.K_DOWN:
-                    self.menu_option = (self.menu_option + 1) % len(options)  
-                elif key == pg.K_RETURN: 
+                    self.menu_option = (self.menu_option + 1) % len(options)
+                elif key == pg.K_RETURN:
                     if self.menu_option == 0:
-                        self.start = True
-                    elif self.menu_option == 1:  
+                        self.start = True   #ot maan have function mor pg mix k vea start kert
+                    elif self.menu_option == 1:
                         self.current_screen = 1
                     elif self.menu_option == 2:
                         self.run = False
-                        
+
             elif self.current_screen == 1:
                 self.show_help(key)
 
-        pg.display.flip()
+        pg.display.flip() 
 
 
     def show_shop(self):
