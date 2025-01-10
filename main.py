@@ -33,7 +33,6 @@ class Game():
         self.player_inventory = {}
         self.player_coins = 100 
 
-
     def random_spawn_enemy(self):
         a = random.randint(0, 300)
         if a == 50 and len(self.enemies) < 10:
