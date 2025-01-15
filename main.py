@@ -37,7 +37,6 @@ class Game():
        
         
 
-
     def random_spawn_enemy(self):
         a = random.randint(0, 300)
         if a == 50 and len(self.enemies) < 10:
@@ -150,7 +149,7 @@ class Game():
             bar_x = (screenx - bar_width) // 2
             bar_y = (screeny - bar_height) // 2 + 50
 
-            pg.draw.rect(self.screen, WHITE, #ot ban hav function load-game mok mix k vea can work
+            pg.draw.rect(self.screen, WHITE, 
                  (bar_x - border_thickness, bar_y - border_thickness, 
                   bar_width + border_thickness * 2, bar_height + border_thickness * 2), 
                  border_radius=border_radius)
@@ -210,7 +209,7 @@ class Game():
                     self.menu_option = (self.menu_option + 1) % len(options)
                 elif key == pg.K_RETURN:
                     if self.menu_option == 0:
-                        self.start = True   #ot maan have function mor pg mix k vea start kert
+                        self.start = True  
                     elif self.menu_option == 1:
                         self.current_screen = 1
                     elif self.menu_option == 2:
