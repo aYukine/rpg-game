@@ -19,4 +19,4 @@ player_speed = 200
 player_starting = (14, 21)
 
 # bullet
-bullet_speed = 500
+bullet_speed = 500 

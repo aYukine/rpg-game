@@ -220,13 +220,11 @@ class Game():
 
         pg.display.flip() 
 
-
     def show_shop(self):
         pass
 
     def show_inventory(self):
         pass
-
                             
     def show_help(self, key):
         font = pg.font.Font(None, 40)
