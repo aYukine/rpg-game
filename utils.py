@@ -1,6 +1,7 @@
 import pygame
 import csv
-from resource_loader import block_decoder
+from resource_loader import tiles_decoder, block_decoder
+from entity import Block
 
 def write(master, color, text, x, y, pos, size=10):
     font = pygame.font.Font(None, size)
@@ -9,6 +10,24 @@ def write(master, color, text, x, y, pos, size=10):
     if pos == "MIDDLE":
         width, height = font.size(text)
         master.blit(font.render(str(text), True, color), (x-(width/2), y-(height/2)))
+
+def block_reader(filename):
+    block_tiles = []
+    with open(filename, "r") as f:
+        reader = csv.reader(f)
+        for row in reader:
+            new_row = []
+            for cell in row:
+                if cell != '0':
+                    block_img = block_decoder.get(int(cell))
+                    block = Block(block_img)
+                    new_row.append(block)
+                else:
+                    new_row.append(0)
+
+            block_tiles.append(new_row)
+
+    return block_tiles
 
 def map_reader(filename):
     map_tiles = []
@@ -24,7 +43,7 @@ def map_reader(filename):
     for i, row in enumerate(map_tiles):
         for j, cell in enumerate(row):
             
-            block = block_decoder.get(cell)
+            block = tiles_decoder.get(cell)
             if block:
                 map_surface.blit(block, (j * tile_width, i * tile_height))
 

@@ -18,5 +18,7 @@ Light_Green = (144, 238, 144)
 player_speed = 200
 player_starting = (14, 21)
 
+e_speed = 150
+
 # bullet
 bullet_speed = 500 

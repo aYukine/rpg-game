@@ -2,8 +2,8 @@ import pygame as pg
 
 # tiles
 
+tiles_decoder = {}
 block_decoder = {}
-
 
 def load_data():
     grass = pg.image.load("resource/tiles/grass.png").convert_alpha()
@@ -27,23 +27,43 @@ def load_data():
     watergrass7 = pg.image.load("resource/tiles/watergrass7.png").convert_alpha()
     watergrass8 = pg.image.load("resource/tiles/watergrass8.png").convert_alpha()
 
-    block_decoder[1] = grass
-    block_decoder[2] = stone
-    block_decoder[3] = grasstone1
-    block_decoder[4] = grasstone2
-    block_decoder[5] = grasstone3
-    block_decoder[6] = grasstone4
-    block_decoder[7] = grasstone5
-    block_decoder[8] = grasstone6
-    block_decoder[9] = grassstone7
-    block_decoder[10] = grassstone8
+    wall = pg.image.load("resource/blocks/wall.png").convert_alpha()
+    tree1 = pg.image.load("resource/blocks/tree1.png").convert_alpha()
+    tree2 = pg.image.load("resource/blocks/tree2.png").convert_alpha()
 
-    block_decoder[11] = water
-    block_decoder[12] = watergrass1
-    block_decoder[13] = watergrass2
-    block_decoder[14] = watergrass3
-    block_decoder[15] = watergrass4
-    block_decoder[16] = watergrass5
-    block_decoder[17] = watergrass6
-    block_decoder[18] = watergrass7
-    block_decoder[19] = watergrass8
+    tiles_decoder[1] = grass
+    tiles_decoder[2] = stone
+    tiles_decoder[3] = grasstone1
+    tiles_decoder[4] = grasstone2
+    tiles_decoder[5] = grasstone3
+    tiles_decoder[6] = grasstone4
+    tiles_decoder[7] = grasstone5
+    tiles_decoder[8] = grasstone6
+    tiles_decoder[9] = grassstone7
+    tiles_decoder[10] = grassstone8
+
+    tiles_decoder[11] = water
+    tiles_decoder[12] = watergrass1
+    tiles_decoder[13] = watergrass2
+    tiles_decoder[14] = watergrass3
+    tiles_decoder[15] = watergrass4
+    tiles_decoder[16] = watergrass5
+    tiles_decoder[17] = watergrass6
+    tiles_decoder[18] = watergrass7
+    tiles_decoder[19] = watergrass8
+
+    block_decoder[1] = wall
+    block_decoder[2] = tree1
+    block_decoder[3] = tree2
+
+def load_player():
+    player = []
+    for i in range(12):
+        player.append(pg.image.load("resource/player/sprite_"+str(i)+".png").convert_alpha())
+    return player
+
+def load_enemy():
+    enemy = []
+    for i in range(12):
+        enemy.append(pg.image.load("resource/enemy/sprite_"+str(i)+".png").convert_alpha())
+    return enemy

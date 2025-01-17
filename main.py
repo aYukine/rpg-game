@@ -18,9 +18,9 @@ class Game():
         self.offset_x = -screenx//2
         self.offset_y = -screeny//2
         self.run = True
-        self.player = entity.Player("Player", 200, 0, 0, self.offset_x, self.offset_y)
         self.current_time = time.perf_counter()
         self.map = None
+        self.map2 = None
         self.map_offsetx = (player_starting[0]-1)*width
         self.map_offsety = (player_starting[1]-1)*height
         self.projectiles = []
@@ -33,26 +33,26 @@ class Game():
         self.current_screen = 0
         self.player_inventory = {}
         self.player_coins = 100 
-        self.image = pg.image.load("resource/img/background.png")
+        self.image = pg.image.load("resource/img/background.png").convert_alpha()
        
-        
-
     def random_spawn_enemy(self):
         a = random.randint(0, 300)
         if a == 50 and len(self.enemies) < 10:
             x = random.randint(int(self.player.x-1000), int(self.player.x+1000))
             y = random.randint(int(self.player.y-1000), int(self.player.y+1000))
             if utils.distant_from_player(x, y, self.player.x, self.player.y) > 500:
-                self.enemies.append(entity.Enemy("Enemy", 100, x, y, self.offset_x, self.offset_y))
+                self.enemies.append(entity.Enemy("Enemy", 100, x, y, self.offset_x, self.offset_y, self.enemy_sprite, 50, 108))
 
     def load_game(self):
         load_data()
         self.progress = 30
         self.map = utils.map_reader("resource/map.csv")
+        self.map2 = utils.block_reader("resource/map2.csv")
+        # print(self.map2)
         self.progress = 60
-        time.sleep(2)
-        self.progress = 90
-        time.sleep(2)
+        self.player_sprite = load_player()
+        self.enemy_sprite = load_enemy()
+        self.player = entity.Player("Player", 200, 0, 0, self.offset_x, self.offset_y, self.player_sprite, 50, 108)
         self.progress = 100
 
     def controller_handle(self, dt, key, mouse):
@@ -62,32 +62,45 @@ class Game():
             self.projectiles.append(entity.Bullets(self.player.x, self.player.y, utils.find_bullet_vector(self.player.x, self.player.y, mx+self.offset_x, my+self.offset_y)))
         press = pg.key.get_pressed()
         if press[pg.K_w]:
-            y -= dt*player_speed
+            y -= player_speed
         if press[pg.K_s]:
-            y += dt*player_speed
+            y += player_speed
         if press[pg.K_a]:
-            x -= dt*player_speed
+            x -= player_speed
         if press[pg.K_d]:
-            x += dt*player_speed
+            x += player_speed
         
-        self.player.move(x, y)
+        self.player.move(x, y, dt)
         self.update_global_xy()
 
     def handle_games(self, dt, key, mouse):
         self.controller_handle(dt, key, mouse)
         self.random_spawn_enemy()
         self.player.process(dt)
+
         for p in self.projectiles:
             p.move(dt)
+
+        for row in self.map2:
+            for block in row:
+                if block != 0:
+                    block.fix_collision(self.player, self.offset_x, self.offset_y)
 
         for e in self.enemies:
             e.process(dt)
             if utils.distant_from_player(e.x, e.y, self.player.x, self.player.y) < 400:
-                e.move((self.player.x - e.x) * dt, (self.player.y - e.y) * dt)
+                e.move(min((self.player.x - e.x), e_speed), min((self.player.y - e.y), e_speed), dt)
+            elif utils.distant_from_player(e.x, e.y, self.player.x, self.player.y) > 1500:
+                self.enemies.remove(e)
             for p in self.projectiles:
                 if e.rect.colliderect(pg.Rect(p.x-self.offset_x-5, p.y-self.offset_y-5, 10, 10)):
                     e.hp -= 10
                     self.projectiles.remove(p)
+            
+            for row in self.map2:
+                for block in row:
+                    if block != 0:	
+                        block.fix_collision(e, self.offset_x, self.offset_y)
 
             if e.rect.colliderect(self.player.rect):
                 self.player.take_damage(10)
@@ -98,30 +111,31 @@ class Game():
         self.offset_x = self.player.x - screenx//2
         self.offset_y = self.player.y - screeny//2
 
-    def map_builder(self):
-        pass
-        # start_y = int(self.player.y // height + player_starting[1] - 4)
-        # end_y = int(self.player.y // height + player_starting[1] + 4)
-        # start_x = int(self.player.x // width + player_starting[0] - 4)
-        # end_x = int(self.player.x // width + player_starting[0] + 4)
+    def layer2_builder(self):
+        start_y = int(self.player.y // height + player_starting[1] - 13)
+        end_y = int(self.player.y // height + player_starting[1] + 13)
+        start_x = int(self.player.x // width + player_starting[0] - 13)
+        end_x = int(self.player.x // width + player_starting[0] + 13)
 
-        # offset_x = self.offset_x + self.map_offsetx
-        # offset_y = self.offset_y + self.map_offsety
-        # half_width = width // 2
-        # half_height = height // 2
+        offset_x = self.offset_x + self.map_offsetx
+        offset_y = self.offset_y + self.map_offsety
+        half_width = width // 2
+        half_height = height // 2
 
-        # for i in range(start_y, end_y):
-        #     if 0 <= i < len(self.map):
-        #         for j in range(start_x, end_x):
-        #             if 0 <= j < len(self.map[i]):
-        #                 block = block_decoder.get(self.map[i][j])
-        #                 if block:
-        #                     self.screen.blit(block, (j * width - half_width - offset_x, i * height - half_height - offset_y))
+        for i in range(start_y, end_y):
+            if 0 <= i < len(self.map2):
+                for j in range(start_x, end_x):
+                    if 0 <= j < len(self.map2[i]) and self.map2[i][j] != 0:
+                        self.map2[i][j].update_rect(j * width - half_width - offset_x, i * height - half_height - offset_y)
+                        block = self.map2[i][j].sprite
+                        
+                        if block:
+                            self.screen.blit(block, (j * width - half_width - offset_x, i * height - half_height - offset_y))
 
     def draw(self):
         self.screen.fill(BLACK)
-        self.screen.blit(self.map, (-self.map_offsetx-self.offset_x, -self.map_offsety-self.offset_y))
-        self.map_builder()
+        self.screen.blit(self.map, (-self.map_offsetx-self.offset_x-width//2, -self.map_offsety-self.offset_y-height//2))
+        self.layer2_builder()
         self.player.draw(self.screen, self.offset_x, self.offset_y)
         for e in self.enemies:
             e.draw(self.screen, self.offset_x, self.offset_y)
@@ -140,7 +154,6 @@ class Game():
             loading_text = font.render("Loading...", True, WHITE)
             text_rect = loading_text.get_rect(center=(screenx // 2, screeny // 2 - 50))
             self.screen.blit(loading_text, text_rect)
-
             
             bar_width = 400
             bar_height = 40
@@ -250,7 +263,7 @@ class Game():
             key = None
             mouse = False
             dt = time.perf_counter() - self.current_time
-            print(self.clock.get_fps())
+            # print(self.clock.get_fps())
             self.current_time = time.perf_counter()
             self.clock.tick(60)
 
