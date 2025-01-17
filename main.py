@@ -123,14 +123,46 @@ class Game():
         self.screen.blit(self.map, (-self.map_offsetx-self.offset_x, -self.map_offsety-self.offset_y))
         self.map_builder()
         self.player.draw(self.screen, self.offset_x, self.offset_y)
+        
+        # Draw the player's health (blood) above the screen with rounded edges
+        blood_bar_width = 200
+        blood_bar_height = 20
+        blood_x = 40  # Adjusted position to make space for the heart
+        blood_y = 10  # Position slightly below the top edge
+        border_radius = 5  # Adjust this to control the roundness
+
+        # Draw the outer (white border) of the health bar
+        pg.draw.rect(self.screen, WHITE, (blood_x, blood_y, blood_bar_width, blood_bar_height), border_radius=border_radius)
+
+        # Draw the inner (red, proportional to health) of the health bar
+        blood_fill_width = blood_bar_width * (self.player.hp / self.player.max_hp)
+        pg.draw.rect(
+            self.screen, 
+            RED, 
+            (blood_x + 2, blood_y + 2, blood_fill_width - 4, blood_bar_height - 4), 
+            border_radius=border_radius - 2  # Slightly smaller radius for inner bar
+        )
+        
+        # Draw the white circle at the beginning of the health bar (background for the heart)
+        circle_radius = 15  # Increased size of the circle
+        pg.draw.circle(self.screen, WHITE, (blood_x, blood_y + blood_bar_height // 2), circle_radius)  # Circle at the start
+
+        # Load and draw the red heart inside the white circle
+        heart_image = pg.image.load('resource/img/heart.png')  # Replace with the path to your heart image
+        heart_image = pg.transform.scale(heart_image, (circle_radius * 2, circle_radius * 2))  # Scale heart to fit inside the circle
+        self.screen.blit(heart_image, (blood_x - circle_radius, blood_y + blood_bar_height // 2 - circle_radius))  # Positioned inside the circle
+
         for e in self.enemies:
             e.draw(self.screen, self.offset_x, self.offset_y)
-        utils.write(self.screen, WHITE, f"x: {self.player.x/width:.2f}, y: {self.player.y/width:.2f}", 10, 20, "TOPLEFT", 30)
+
         for p in self.projectiles:
             if utils.distant_from_player(p.x, p.y, self.player.x, self.player.y) > 1000:
                 self.projectiles.remove(p)
             p.draw(self.screen, self.offset_x, self.offset_y)
+    
         pg.display.flip()
+
+
 
     def menu(self, key):
         self.screen.blit(self.image, (0, 0))
@@ -171,7 +203,7 @@ class Game():
 
 
         else:
-            if self.current_screen == 0:
+            if self.current_screen == 0: #why jam bach set ah ng tver ey
                 font_title = pg.font.Font("resource/font/LilitaOne-Regular.ttf", 100)
                 font_options = pg.font.Font("resource/font/LilitaOne-Regular.ttf", 40)
 
@@ -187,7 +219,7 @@ class Game():
                     option_surface = font_options.render(option, True, color)
                     option_rect = option_surface.get_rect(center=(screenx // 2, screeny // 2 + i * 70))
                     self.screen.blit(option_surface, option_rect)
-                    option_rects.append(option_rect)
+                    option_rects.append(option_rect)     #why dak append ng mok tver ey
 
                 mouse_pos = pg.mouse.get_pos()  
                 mouse_clicked = pg.mouse.get_pressed()[0]  
@@ -247,7 +279,7 @@ class Game():
     def mainloop(self):
         loader = threading.Thread(target=self.load_game)
         loader.daemon = True
-        loader.start()
+        loader.start() #nis ban mok pi na
         while self.run:
             key = None
             mouse = False
