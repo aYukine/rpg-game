@@ -27,12 +27,15 @@ class Game():
         self.enemies = []
         self.progress = 0
 
+        self.gun = None
+
         self.loaded = False
         self.start = False
         self.menu_option = 0
         self.current_screen = 0
         self.player_inventory = {}
         self.player_coins = 100 
+        self.soundtracks = []
         self.image = pg.image.load("resource/img/background.png").convert_alpha()
        
     def random_spawn_enemy(self):
@@ -41,7 +44,7 @@ class Game():
             x = random.randint(int(self.player.x-1000), int(self.player.x+1000))
             y = random.randint(int(self.player.y-1000), int(self.player.y+1000))
             if utils.distant_from_player(x, y, self.player.x, self.player.y) > 500:
-                self.enemies.append(entity.Enemy("Enemy", 100, x, y, self.offset_x, self.offset_y, self.enemy_sprite, 50, 108))
+                self.enemies.append(entity.Enemy("Enemy", 100, x, y, self.offset_x, self.offset_y, self.enemy_sprite, 50, 50))
 
     def load_game(self):
         load_data()
@@ -53,6 +56,7 @@ class Game():
         self.player_sprite = load_player()
         self.enemy_sprite = load_enemy()
         self.player = entity.Player("Player", 200, 0, 0, self.offset_x, self.offset_y, self.player_sprite, 50, 108)
+        self.gun = gun_map.get(1)
         self.progress = 100
 
     def controller_handle(self, dt, key, mouse):
@@ -80,6 +84,8 @@ class Game():
 
         for p in self.projectiles:
             p.move(dt)
+            if utils.distant_from_player(p.x, p.y, self.player.x, self.player.y) > 1000:
+                self.projectiles.remove(p)
 
         for row in self.map2:
             for block in row:
@@ -133,6 +139,7 @@ class Game():
                             self.screen.blit(block, (j * width - half_width - offset_x, i * height - half_height - offset_y))
 
     def draw(self):
+        mx, my = pg.mouse.get_pos()
         self.screen.fill(BLACK)
         self.screen.blit(self.map, (-self.map_offsetx-self.offset_x-width//2, -self.map_offsety-self.offset_y-height//2))
         self.layer2_builder()
@@ -170,15 +177,14 @@ class Game():
             e.draw(self.screen, self.offset_x, self.offset_y)
 
         for p in self.projectiles:
-            if utils.distant_from_player(p.x, p.y, self.player.x, self.player.y) > 1000:
-                self.projectiles.remove(p)
             p.draw(self.screen, self.offset_x, self.offset_y)
+
+        gun_angle = utils.find_gun_angle((1, 0), (mx-screenx//2, my-screeny//2))
+        utils.blitRotate(self.screen, self.gun, (screenx//2, screeny//2), (-30, 0), gun_angle)
     
         pg.display.flip()
 
-
-
-    def menu(self, key):
+    def menu(self, key, mouse):
         self.screen.blit(self.image, (0, 0))
         if not self.loaded:
             
@@ -208,15 +214,12 @@ class Game():
                  border_radius=border_radius)
 
             if self.progress == 100:
-                for event in pg.event.get():
-                    if event.type == pg.KEYDOWN and event.key == pg.K_RETURN:
-                        self.loaded = True
-                    elif event.type == pg.MOUSEBUTTONDOWN:
-                        self.loaded = True
+                if mouse or key == pg.K_RETURN:
+                    self.loaded = True
 
 
         else:
-            if self.current_screen == 0: #why jam bach set ah ng tver ey
+            if self.current_screen == 0:
                 font_title = pg.font.Font("resource/font/LilitaOne-Regular.ttf", 100)
                 font_options = pg.font.Font("resource/font/LilitaOne-Regular.ttf", 40)
 
@@ -270,6 +273,11 @@ class Game():
 
     def show_inventory(self):
         pass
+
+    def show_settings(self, key):
+        if key == pg.K_ESCAPE:
+            self.current_screen = 0
+        pg.display.flip()
                             
     def show_help(self, key):
         font = pg.font.Font(None, 40)
@@ -308,7 +316,7 @@ class Game():
                     mouse = True
 
             if self.start == False:
-                self.menu(key)
+                self.menu(key, mouse)
                 continue
 
             self.handle_games(dt, key, mouse)
