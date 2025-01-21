@@ -99,19 +99,15 @@ class Game():
         self.update_global_xy()
 
     def handle_games(self, dt, key, mouse):
+        self.player.check_rect_collide_block(self.map2)
         self.controller_handle(dt, key, mouse)
-        self.random_spawn_enemy()
+        # self.random_spawn_enemy()
         self.player.process(dt)
 
         for p in self.projectiles:
             p.move(dt)
             if utils.distant_from_player(p.x, p.y, self.player.x, self.player.y) > 1000:
                 self.projectiles.remove(p)
-
-        for row in self.map2:
-            for block in row:
-                if block != 0:
-                    block.fix_collision(self.player, self.offset_x, self.offset_y)
 
         for e in self.enemies:
             e.process(dt)
@@ -124,10 +120,7 @@ class Game():
                     e.hp -= 10
                     self.projectiles.remove(p)
             
-            for row in self.map2:
-                for block in row:
-                    if block != 0:	
-                        block.fix_collision(e, self.offset_x, self.offset_y)
+            e.check_rect_collide_block(self.map2)
 
             if e.rect.colliderect(self.player.rect):
                 self.player.take_damage(10)
@@ -197,6 +190,21 @@ class Game():
         heart_image = pg.transform.scale(heart_image, (circle_radius * 2, circle_radius * 2))  # Scale heart to fit inside the circle
         self.screen.blit(heart_image, (blood_x - circle_radius, blood_y + blood_bar_height // 2 - circle_radius))  # Positioned inside the circle
 
+        # Draw the coin count next to the health bar
+        coin_x = screenx - 100  # Position next to the health bar
+        coin_y = blood_y 
+        coin_icon_size = 30
+
+        # Load and draw the coin icon
+        coin_image = pg.image.load('resource/img/coin.png')  # Replace with the path to your coin image
+        coin_image = pg.transform.scale(coin_image, (coin_icon_size, coin_icon_size))  # Scale coin to desired size
+        self.screen.blit(coin_image, (coin_x, coin_y))
+
+        # Draw the coin count as text
+        font = pg.font.Font("resource/font/LilitaOne-Regular.ttf", 30)
+        coin_count_text = font.render(str(self.enemy_kills), True, WHITE)  # Render coin count text
+        self.screen.blit(coin_count_text, (coin_x + coin_icon_size + 10, coin_y - 2))  # Position text next to coin icon
+
         for e in self.enemies:
             e.draw(self.screen, self.offset_x, self.offset_y)
 
@@ -258,7 +266,7 @@ class Game():
                     option_surface = font_options.render(option, True, color)
                     option_rect = option_surface.get_rect(center=(screenx // 2, screeny // 2 + i * 70))
                     self.screen.blit(option_surface, option_rect)
-                    option_rects.append(option_rect)     #why dak append ng mok tver ey
+                    option_rects.append(option_rect)     
 
                 mouse_pos = pg.mouse.get_pos()  
                 mouse_clicked = pg.mouse.get_pressed()[0]  
