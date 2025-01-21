@@ -44,6 +44,8 @@ class Entity:
         if self.invincibility <= 0:
             self.hp -= damage
             self.invincibility = self.invincibility_cooldown
+            if self.hp < 0:
+                self.hp = 0
 
     def process(self, dt):
         self.invincibility -= dt
@@ -95,16 +97,15 @@ class Block():
         self.rect = pg.Rect(x, y, 50, 50)
 
     def fix_collision(self, entity, offsetx, offsety):
-        if self.rect.colliderect(entity.rect) and abs(entity.x - offsetx) > abs(entity.y - offsety):
-            if entity.x - offsetx > self.x:
-                entity.x = self.x + offsetx + self.width//2 + entity.width//2 + 25
-            elif entity.x - offsetx < self.x:
-                entity.x = self.x + offsetx + self.width//2 - entity.width//2 - 25
-                
-        elif self.rect.colliderect(entity.rect) and abs(entity.x - offsetx) < abs(entity.y - offsety):
-            if entity.y - offsety> self.y:
-                entity.y = self.y + offsety + self.height//2 + entity.height//2 + 25
-            elif entity.y - offsety< self.y:
-                entity.y = self.y + offsety + self.height//2 - entity.height//2 -25
+        if self.rect.colliderect(entity.rect):
+            error_x = entity.x - self.x - offsetx
+            error_y = entity.y - self.y - offsety
 
-        
+            if error_x > 25:
+                entity.x += 25
+            elif error_x <= -25:
+                entity.x -= 25
+            if error_y > 25:
+                entity.y += 25
+            elif error_y <= -25:
+                entity.y -= 25        

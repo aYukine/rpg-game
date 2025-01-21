@@ -4,6 +4,7 @@ import pygame as pg
 
 tiles_decoder = {}
 block_decoder = {}
+gun_map = {}
 
 def load_data():
     grass = pg.image.load("resource/tiles/grass.png").convert_alpha()
@@ -27,10 +28,6 @@ def load_data():
     watergrass7 = pg.image.load("resource/tiles/watergrass7.png").convert_alpha()
     watergrass8 = pg.image.load("resource/tiles/watergrass8.png").convert_alpha()
 
-    wall = pg.image.load("resource/blocks/wall.png").convert_alpha()
-    tree1 = pg.image.load("resource/blocks/tree1.png").convert_alpha()
-    tree2 = pg.image.load("resource/blocks/tree2.png").convert_alpha()
-
     tiles_decoder[1] = grass
     tiles_decoder[2] = stone
     tiles_decoder[3] = grasstone1
@@ -52,9 +49,18 @@ def load_data():
     block_decoder[11] = watergrass7
     block_decoder[12] = watergrass8
 
+    wall = pg.image.load("resource/blocks/wall.png").convert_alpha()
+    tree1 = pg.image.load("resource/blocks/tree1.png").convert_alpha()
+    tree2 = pg.image.load("resource/blocks/tree2.png").convert_alpha()
+
     block_decoder[1] = wall
     block_decoder[2] = tree1
     block_decoder[3] = tree2
+
+    gun1 = pg.image.load("resource/gun/gun1.png").convert_alpha()
+    print(gun1)
+
+    gun_map[1] = gun1
 
 def load_player():
     player = []
@@ -67,3 +73,8 @@ def load_enemy():
     for i in range(12):
         enemy.append(pg.image.load("resource/enemy/sprite_"+str(i)+".png").convert_alpha())
     return enemy
+
+def load_sound():
+    pass
+    # sounds  = []
+    # sounds.append(pg.mixer.Sound("resource/sound/shot.wav"))
