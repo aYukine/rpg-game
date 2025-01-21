@@ -44,6 +44,8 @@ class Game():
         self.player_coins = 100 
         self.soundtracks = []
         self.image = pg.image.load("resource/img/background.png").convert_alpha()
+        self.image_game_over = pg.image.load("resource/img/death.jpg").convert_alpha()
+        self.enemy_kills = 0
 
         self.volume = 0.5
 
@@ -101,7 +103,7 @@ class Game():
     def handle_games(self, dt, key, mouse):
         self.player.check_rect_collide_block(self.map2)
         self.controller_handle(dt, key, mouse)
-        # self.random_spawn_enemy()
+        self.random_spawn_enemy()
         self.player.process(dt)
 
         for p in self.projectiles:
@@ -128,7 +130,80 @@ class Game():
                 self.enemies.remove(e)
         if self.player.hp <= 0:
             # self.play_sound_effect(death_music)
-            pass
+            self.run_death_menu()
+    def run_death_menu(self):
+        pg.mixer.music.pause()
+        font = pg.font.Font("resource/font/LilitaOne-Regular.ttf", 50)
+        
+        options = ["Restart Game", "Quit"]
+        option_positions = [
+            (self.screen.get_width() // 2, 300),  
+            (self.screen.get_width() // 2, 400),  
+        ]
+        selected_index = 0 
+
+        while True:
+            self.screen.blit(self.image_game_over, (0, 0))
+            mouse_x, mouse_y = pg.mouse.get_pos()
+
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    pg.quit()
+                    exit()
+                if event.type == pg.KEYDOWN:
+                    if event.key == pg.K_UP:  
+                        selected_index = (selected_index - 1) % len(options)
+                    elif event.key == pg.K_DOWN:  
+                        selected_index = (selected_index + 1) % len(options)
+                    elif event.key == pg.K_RETURN: 
+                        if selected_index == 0:
+                            self.restart_game()
+                            pg.mixer.music.unpause()
+                            return
+                        elif selected_index == 1:
+                            pg.quit()
+                            exit()
+                elif event.type == pg.MOUSEBUTTONDOWN:
+                  
+                    for i, (x, y) in enumerate(option_positions):
+                        text_width = font.size(options[i])[0]
+                        text_height = font.size(options[i])[1]
+                        if x - text_width // 2 <= mouse_x <= x + text_width // 2 and \
+                            y - text_height // 2 <= mouse_y <= y + text_height // 2:
+                            if i == 0:  
+                                self.restart_game()
+                                pg.mixer.music.unpause()
+                                return
+                            elif i == 1:  
+                                pg.quit()
+                                exit()
+
+            for i, (x, y) in enumerate(option_positions):
+                text_color = RED if (
+                    x - font.size(options[i])[0] // 2 <= mouse_x <= x + font.size(options[i])[0] // 2 and
+                    y - font.size(options[i])[1] // 2 <= mouse_y <= y + font.size(options[i])[1] // 2
+                ) or i == selected_index else WHITE
+
+                option_text = font.render(options[i], True, text_color)
+                self.screen.blit(option_text, (x - option_text.get_width() // 2, y - option_text.get_height() // 2))
+
+            death_text = font.render("Game Over", True, WHITE)
+            self.screen.blit(death_text, (self.screen.get_width() // 2 - death_text.get_width() // 2, 150))
+
+            pg.display.flip()
+            pg.time.delay(100)
+
+                       
+
+    def restart_game(self):
+        self.player.hp = self.player.max_hp  
+        self.enemies.clear()  
+        self.projectiles.clear() 
+        self.player.x, self.player.y = 0, 0  
+        self.offset_x = -screenx // 2
+        self.offset_y = -screeny // 2
+
+
         
     def update_global_xy(self): 
         self.offset_x = self.player.x - screenx//2
