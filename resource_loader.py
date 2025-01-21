@@ -42,15 +42,15 @@ def load_data():
     tiles_decoder[9] = grassstone7
     tiles_decoder[10] = grassstone8
 
-    tiles_decoder[11] = water
-    tiles_decoder[12] = watergrass1
-    tiles_decoder[13] = watergrass2
-    tiles_decoder[14] = watergrass3
-    tiles_decoder[15] = watergrass4
-    tiles_decoder[16] = watergrass5
-    tiles_decoder[17] = watergrass6
-    tiles_decoder[18] = watergrass7
-    tiles_decoder[19] = watergrass8
+    block_decoder[4] = water
+    block_decoder[5] = watergrass1
+    block_decoder[6] = watergrass2
+    block_decoder[7] = watergrass3
+    block_decoder[8] = watergrass4
+    block_decoder[9] = watergrass5
+    block_decoder[10] = watergrass6
+    block_decoder[11] = watergrass7
+    block_decoder[12] = watergrass8
 
     block_decoder[1] = wall
     block_decoder[2] = tree1
