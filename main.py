@@ -134,7 +134,7 @@ class Game():
     def run_death_menu(self):
         pg.mixer.music.pause()
         font = pg.font.Font("resource/font/LilitaOne-Regular.ttf", 50)
-        
+
         options = ["Restart Game", "Quit"]
         option_positions = [
             (self.screen.get_width() // 2, 300),  
@@ -203,7 +203,7 @@ class Game():
         self.offset_x = -screenx // 2
         self.offset_y = -screeny // 2
 
-
+        self.random_spawn_enemy() 
         
     def update_global_xy(self): 
         self.offset_x = self.player.x - screenx//2
