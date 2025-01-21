@@ -203,7 +203,7 @@ class Game():
         self.offset_x = -screenx // 2
         self.offset_y = -screeny // 2
 
-        self.random_spawn_enemy() 
+        
         
     def update_global_xy(self): 
         self.offset_x = self.player.x - screenx//2
