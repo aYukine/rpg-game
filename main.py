@@ -9,6 +9,13 @@ import threading
 import time
 import random
 
+pg.mixer.init()
+background_music = "resource/sounds/background_music.mp3"
+# start_music = "resource/sounds/start_game.mp3"
+# death_music = "resource/sounds/player_death.mp3"
+# enemy_spawn_music = "resource/sounds/enemy_spawn.mp3"
+# game_over_music = "resource/sounds/game_over.mp3"
+
 pg.init()
 
 class Game():
@@ -37,6 +44,18 @@ class Game():
         self.player_coins = 100 
         self.soundtracks = []
         self.image = pg.image.load("resource/img/background.png").convert_alpha()
+
+        self.volume = 0.5
+
+    def play_background_music(self):
+        pg.mixer.music.load(background_music)
+        pg.mixer.music.set_volume(self.volume)
+        pg.mixer.music.play(-1, 0.0)  
+
+    def play_sound_effect(self, sound_file):
+        sound = pg.mixer.Sound(sound_file)
+        sound.set_volume(self.volume)
+        sound.play()
        
     def random_spawn_enemy(self):
         a = random.randint(0, 300)
@@ -45,6 +64,7 @@ class Game():
             y = random.randint(int(self.player.y-1000), int(self.player.y+1000))
             if utils.distant_from_player(x, y, self.player.x, self.player.y) > 500:
                 self.enemies.append(entity.Enemy("Enemy", 100, x, y, self.offset_x, self.offset_y, self.enemy_sprite, 50, 50))
+                # self.play_sound_effect(enemy_spawn_music)
 
     def load_game(self):
         load_data()
@@ -58,6 +78,7 @@ class Game():
         self.player = entity.Player("Player", 200, 0, 0, self.offset_x, self.offset_y, self.player_sprite, 50, 108)
         self.gun = gun_map.get(1)
         self.progress = 100
+        self.play_background_music() 
 
     def controller_handle(self, dt, key, mouse):
         mx, my = pg.mouse.get_pos()
@@ -112,6 +133,9 @@ class Game():
                 self.player.take_damage(10)
             if e.hp <= 0:
                 self.enemies.remove(e)
+        if self.player.hp <= 0:
+            # self.play_sound_effect(death_music)
+            pass
         
     def update_global_xy(self): 
         self.offset_x = self.player.x - screenx//2
@@ -217,7 +241,6 @@ class Game():
                 if mouse or key == pg.K_RETURN:
                     self.loaded = True
 
-
         else:
             if self.current_screen == 0:
                 font_title = pg.font.Font("resource/font/LilitaOne-Regular.ttf", 100)
@@ -227,7 +250,7 @@ class Game():
                 title_rect = title_surface.get_rect(center=(screenx // 2, screeny // 2.7))
                 self.screen.blit(title_surface, title_rect)
 
-                options = ["Start Game", "Help", "Quit"]
+                options = ["Start Game", "Help","Setting","Quit"]
                 option_rects = []
 
                 for i, option in enumerate(options):
@@ -249,6 +272,8 @@ class Game():
                             elif self.menu_option == 1:
                                 self.current_screen = 1
                             elif self.menu_option == 2:
+                                self.current_screen = 2
+                            elif self.menu_option == 3:
                                 self.run = False
 
                 if key == pg.K_UP:
@@ -261,12 +286,40 @@ class Game():
                     elif self.menu_option == 1:
                         self.current_screen = 1
                     elif self.menu_option == 2:
+                        self.current_screen = 2
+                    elif self.menu_option == 3:
                         self.run = False
 
             elif self.current_screen == 1:
                 self.show_help(key)
+            elif self.current_screen == 2:
+                self.show_settings(key)
 
-        pg.display.flip() 
+        pg.display.flip()
+
+    def show_settings(self, key):
+        font = pg.font.Font(None, 40)
+        lines = [
+            "=== Settings ===",
+            f"Volume: {int(self.volume * 100)}%",
+            "Use Arrow Keys to Adjust Volume",
+            "Press ENTER to Return",
+        ]
+        for i, line in enumerate(lines):
+            text_surface = font.render(line, True, WHITE)
+            text_rect = text_surface.get_rect(center=(screenx // 2, screeny // 3 + i * 40))
+            self.screen.blit(text_surface, text_rect)
+
+        if key == pg.K_LEFT:
+            self.volume = max(0, self.volume - 0.05)
+            pg.mixer.music.set_volume(self.volume)
+        elif key == pg.K_RIGHT:
+            self.volume = min(1, self.volume + 0.05)
+            pg.mixer.music.set_volume(self.volume)
+        elif key == pg.K_RETURN:
+            self.current_screen = 0  # Return to main menu
+
+        pg.display.flip()
 
     def show_shop(self):
         pass
