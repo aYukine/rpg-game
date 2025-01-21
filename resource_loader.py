@@ -58,8 +58,6 @@ def load_data():
     block_decoder[3] = tree2
 
     gun1 = pg.image.load("resource/gun/gun1.png").convert_alpha()
-    print(gun1)
-
     gun_map[1] = gun1
 
 def load_player():

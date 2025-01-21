@@ -79,19 +79,15 @@ class Game():
         self.update_global_xy()
 
     def handle_games(self, dt, key, mouse):
+        self.player.check_rect_collide_block(self.map2)
         self.controller_handle(dt, key, mouse)
-        self.random_spawn_enemy()
+        # self.random_spawn_enemy()
         self.player.process(dt)
 
         for p in self.projectiles:
             p.move(dt)
             if utils.distant_from_player(p.x, p.y, self.player.x, self.player.y) > 1000:
                 self.projectiles.remove(p)
-
-        for row in self.map2:
-            for block in row:
-                if block != 0:
-                    block.fix_collision(self.player, self.offset_x, self.offset_y)
 
         for e in self.enemies:
             e.process(dt)
@@ -104,10 +100,7 @@ class Game():
                     e.hp -= 10
                     self.projectiles.remove(p)
             
-            for row in self.map2:
-                for block in row:
-                    if block != 0:	
-                        block.fix_collision(e, self.offset_x, self.offset_y)
+            e.check_rect_collide_block(self.map2)
 
             if e.rect.colliderect(self.player.rect):
                 self.player.take_damage(10)
