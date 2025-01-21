@@ -48,7 +48,6 @@ class Entity:
         master.blit(self.sprite[self.sprite_index], (self.x-offsetx-self.width//2, self.y-offsety-self.height//2))
 
     def check_rect_collide_block(self, blocks:Block):
-        
         self.collision = [0, 0, 0, 0]
         for row in blocks:
             for b in row:
@@ -70,17 +69,20 @@ class Entity:
                     self.collision[3] = 1
                 else:
                     self.collision[3] = 0
-            print(self.collision)
 
     def move(self, x, y, dt):
         self.sprite_counter += dt
         if self.collision[0] and x < 0:
+            self.sprite_index = 3
             x = 0
         if self.collision[1] and x > 0:
+            self.sprite_index = 6
             x = 0
         if self.collision[2] and y < 0:
+            self.sprite_index = 9
             y = 0
         if self.collision[3] and y > 0:
+            self.sprite_index = 0
             y = 0
         self.x += x*dt
         self.y += y*dt

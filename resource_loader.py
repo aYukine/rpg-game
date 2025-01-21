@@ -6,6 +6,15 @@ tiles_decoder = {}
 block_decoder = {}
 gun_map = {}
 
+circle_radius = 15 
+heart_image = pg.image.load('resource/img/heart.png')
+heart_image = pg.transform.scale(heart_image, (circle_radius * 2, circle_radius * 2))
+
+coin_icon_size = 30
+coin_image = pg.image.load('resource/img/coin.png')
+coin_image = pg.transform.scale(coin_image, (coin_icon_size, coin_icon_size))
+
+
 def load_data():
     grass = pg.image.load("resource/tiles/grass.png").convert_alpha()
     stone = pg.image.load("resource/tiles/stone.png").convert_alpha()

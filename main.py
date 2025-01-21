@@ -236,49 +236,26 @@ class Game():
         self.screen.blit(self.map, (-self.map_offsetx-self.offset_x-width//2, -self.map_offsety-self.offset_y-height//2))
         self.layer2_builder()
         self.player.draw(self.screen, self.offset_x, self.offset_y)
-        
-        # Draw the player's health (blood) above the screen with rounded edges
-        blood_bar_width = 200
-        blood_bar_height = 20
-        blood_x = 40  # Adjusted position to make space for the heart
-        blood_y = 10  # Position slightly below the top edge
-        border_radius = 5  # Adjust this to control the roundness
 
-        # Draw the outer (white border) of the health bar
         pg.draw.rect(self.screen, WHITE, (blood_x, blood_y, blood_bar_width, blood_bar_height), border_radius=border_radius)
 
-        # Draw the inner (red, proportional to health) of the health bar
         blood_fill_width = blood_bar_width * (self.player.hp / self.player.max_hp)
         pg.draw.rect(
             self.screen, 
             RED, 
             (blood_x + 2, blood_y + 2, blood_fill_width - 4, blood_bar_height - 4), 
-            border_radius=border_radius - 2  # Slightly smaller radius for inner bar
+            border_radius=border_radius - 2 
         )
         
-        # Draw the white circle at the beginning of the health bar (background for the heart)
-        circle_radius = 15  # Increased size of the circle
-        pg.draw.circle(self.screen, WHITE, (blood_x, blood_y + blood_bar_height // 2), circle_radius)  # Circle at the start
+        pg.draw.circle(self.screen, WHITE, (blood_x, blood_y + blood_bar_height // 2), circle_radius)
 
-        # Load and draw the red heart inside the white circle
-        heart_image = pg.image.load('resource/img/heart.png')  # Replace with the path to your heart image
-        heart_image = pg.transform.scale(heart_image, (circle_radius * 2, circle_radius * 2))  # Scale heart to fit inside the circle
-        self.screen.blit(heart_image, (blood_x - circle_radius, blood_y + blood_bar_height // 2 - circle_radius))  # Positioned inside the circle
+        self.screen.blit(heart_image, (blood_x - circle_radius, blood_y + blood_bar_height // 2 - circle_radius))
 
-        # Draw the coin count next to the health bar
-        coin_x = screenx - 100  # Position next to the health bar
-        coin_y = blood_y 
-        coin_icon_size = 30
-
-        # Load and draw the coin icon
-        coin_image = pg.image.load('resource/img/coin.png')  # Replace with the path to your coin image
-        coin_image = pg.transform.scale(coin_image, (coin_icon_size, coin_icon_size))  # Scale coin to desired size
         self.screen.blit(coin_image, (coin_x, coin_y))
 
-        # Draw the coin count as text
         font = pg.font.Font("resource/font/LilitaOne-Regular.ttf", 30)
-        coin_count_text = font.render(str(self.enemy_kills), True, WHITE)  # Render coin count text
-        self.screen.blit(coin_count_text, (coin_x + coin_icon_size + 10, coin_y - 2))  # Position text next to coin icon
+        coin_count_text = font.render(str(self.enemy_kills), True, WHITE)
+        self.screen.blit(coin_count_text, (coin_x + coin_icon_size + 10, coin_y - 2))
 
         for e in self.enemies:
             e.draw(self.screen, self.offset_x, self.offset_y)
@@ -294,7 +271,6 @@ class Game():
     def menu(self, key, mouse):
         self.screen.blit(self.image, (0, 0))
         if not self.loaded:
-            
             font = pg.font.Font("resource/font/LilitaOne-Regular.ttf", 40)
             loading_text = font.render("Loading...", True, WHITE)
             text_rect = loading_text.get_rect(center=(screenx // 2, screeny // 2 - 50))
@@ -439,7 +415,7 @@ class Game():
             key = None
             mouse = False
             dt = time.perf_counter() - self.current_time
-            # print(self.clock.get_fps())
+            print(self.clock.get_fps())
             self.current_time = time.perf_counter()
             self.clock.tick(60)
 

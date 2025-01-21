@@ -22,3 +22,15 @@ e_speed = 150
 
 # bullet
 bullet_speed = 500 
+
+
+# draw settings
+blood_bar_width = 200
+blood_bar_height = 20
+blood_x = 40 
+blood_y = 10 
+border_radius = 5
+
+coin_x = screenx - 100
+coin_y = blood_y 
+
