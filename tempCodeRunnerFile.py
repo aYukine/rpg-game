@@ -1,1 +1,1 @@
-run_death_menu
+self.random_spawn_enemy()
