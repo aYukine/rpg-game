@@ -1,5 +1,6 @@
 import pygame as pg
 from settings import *
+import utils
 
 class Block():
     def __init__(self, sprite):
@@ -36,6 +37,7 @@ class Entity:
         self.sprite_index = 0
         self.sprite_counter = 0
         self.collision = [0, 0, 0, 0]
+        self.draw_health = True
 
     def draw(self, master:pg.Surface, offsetx, offsety):
         self.rect = pg.Rect(self.x-offsetx-self.width//2, self.y-offsety-self.height//2, self.width, self.height)
@@ -43,12 +45,15 @@ class Entity:
         self.right_rect = pg.Rect(self.x-offsetx+self.width//2-10, self.y-offsety-self.height//2+10, 10, self.height-20)
         self.top_rect = pg.Rect(self.x-offsetx-self.width//2+10, self.y-offsety-self.height//2, self.width-20, 10)
         self.bottom_rect = pg.Rect(self.x-offsetx-self.width//2+10, self.y-offsety+self.height//2-10, self.width-20, 10)
-        pg.draw.rect(master, WHITE, (self.x-offsetx-self.width//2, self.y-offsety-self.height, self.width, 10))
-        pg.draw.rect(master, RED, (self.x-offsetx-self.width//2+2, self.y-offsety-self.height+1, self.width*(self.hp/self.max_hp)-4, 8))
-        master.blit(self.sprite[self.sprite_index], (self.x-offsetx-self.width//2, self.y-offsety-self.height//2))
+        if self.draw_health:
+            pg.draw.rect(master, WHITE, (self.x-offsetx-self.width//2, self.y-offsety-self.height, self.width, 10))
+            pg.draw.rect(master, RED, (self.x-offsetx-self.width//2+2, self.y-offsety-self.height+1, self.width*(self.hp/self.max_hp)-4, 8))
+        if self.sprite:
+            master.blit(self.sprite[self.sprite_index], (self.x-offsetx-self.width//2, self.y-offsety-self.height//2))
+        else:
+            pg.draw.rect(master, RED, (self.x-offsetx-self.width//2, self.y-offsety-self.height//2, self.width, self.height))
 
     def check_rect_collide_block(self, blocks:Block):
-        
         self.collision = [0, 0, 0, 0]
         for row in blocks:
             for b in row:
@@ -70,17 +75,20 @@ class Entity:
                     self.collision[3] = 1
                 else:
                     self.collision[3] = 0
-            print(self.collision)
 
     def move(self, x, y, dt):
         self.sprite_counter += dt
         if self.collision[0] and x < 0:
+            self.sprite_index = 3
             x = 0
         if self.collision[1] and x > 0:
+            self.sprite_index = 6
             x = 0
         if self.collision[2] and y < 0:
+            self.sprite_index = 9
             y = 0
         if self.collision[3] and y > 0:
+            self.sprite_index = 0
             y = 0
         self.x += x*dt
         self.y += y*dt
@@ -116,7 +124,57 @@ class Enemy(Entity):
 class Passive(Entity):
     def __init__(self, name, hp, x, y, offsetx, offsety, sprite, width=50, height=50):
         super().__init__(x, y, name, hp, offsetx, offsety, sprite, width, height)
+        self.draw_health = False
+        self.quest_accepted = False
+        self.dialog = []
 
+    def draw_speech(self, surface, text, image=None):
+        font = pg.font.Font(None, 24)
+        margin = 20
+        spacing = 10
+        max_width = 300  # adjust as needed
+
+        # Simple text-wrapping function
+        def wrap_text(txt, fnt, max_w):
+            words = txt.split()
+            lines = []
+            current_line = ""
+            for w in words:
+                test_line = (current_line + " " + w).strip()
+                if fnt.size(test_line)[0] <= max_w:
+                    current_line = test_line
+                else:
+                    lines.append(current_line)
+                    current_line = w
+            if current_line:
+                lines.append(current_line)
+            return lines
+
+        lines = wrap_text(text, font, max_width)
+        img_w, img_h = (0, 0) if not image else image.get_size()
+
+        # Calculate box width & height based on lines and optional image
+        text_lines_height = len(lines) * font.get_height()
+        box_w = max(img_w, max_width) + margin * 2
+        box_h = margin * 2 + text_lines_height + (img_h + spacing if image else 0)
+
+        # Position box above the entity
+        box_x = self.rect.centerx - box_w // 2
+        box_y = self.rect.top - box_h - 10
+        pg.draw.rect(surface, (255, 255, 255), (box_x, box_y, box_w, box_h))
+
+        # Draw optional image at top center
+        current_y = box_y + margin
+        if image:
+            surface.blit(image, (box_x + (box_w - img_w) // 2, current_y))
+            current_y += img_h + spacing
+
+        # Draw each wrapped line
+        for line in lines:
+            text_surf = font.render(line, True, (0, 0, 0))
+            line_w = text_surf.get_width()
+            surface.blit(text_surf, (box_x + (box_w - line_w) // 2, current_y))
+            current_y += font.get_height()
 class Projectile:
     def __init__(self, x, y, vector):
         self.x = x
