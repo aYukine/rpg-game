@@ -27,6 +27,7 @@ class Game():
         self.projectiles = []
         self.enemies = []
         self.progress = 0
+        self.damage = 10
         
         self.image = pg.image.load("resource/img/background.png").convert_alpha()
 
@@ -38,9 +39,8 @@ class Game():
         self.menu_option = 0
         self.current_screen = 0
         self.player_inventory = {}
-        self.player_coins = 100 
+        self.player_coins = 10 
         self.soundtracks = []
-        self.enemy_kills = 0
         self.volume = 0.5
 
     def play_background_music(self):
@@ -118,17 +118,23 @@ class Game():
                 self.enemies.remove(e)
             for p in self.projectiles:
                 if e.rect.colliderect(pg.Rect(p.x-self.offset_x-5, p.y-self.offset_y-5, 10, 10)):
-                    e.hp -= 10
+                    e.hp -= self.damage
                     self.projectiles.remove(p)
+                    i = random.randint(1, 2)
+                    self.play_sound_effect(f"resource/sounds/enemy{i}_hit.mp3")
             
             e.check_rect_collide_block(self.map2)
 
             if e.rect.colliderect(self.player.rect):
                 self.player.take_damage(20)
             if e.hp <= 0:
+                self.player_coins += 1
                 self.enemies.remove(e)
+
         if self.player.hp <= 0:
             self.play_sound_effect(death_music)
+            self.play_sound_effect(blood_splatter)
+            self.play_sound_effect(game_over_music)
             self.run_death_menu()
 
     def run_death_menu(self):
@@ -263,7 +269,7 @@ class Game():
         self.screen.blit(coin_image, (coin_x, coin_y))
 
         font = pg.font.Font("resource/font/LilitaOne-Regular.ttf", 30)
-        coin_count_text = font.render(str(self.enemy_kills), True, WHITE)
+        coin_count_text = font.render(str(self.player_coins), True, WHITE)
         self.screen.blit(coin_count_text, (coin_x + coin_icon_size + 10, coin_y - 2))
     
         pg.display.flip()

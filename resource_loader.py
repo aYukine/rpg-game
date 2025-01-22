@@ -14,13 +14,11 @@ coin_image = pg.image.load('resource/img/coin.png')
 coin_image = pg.transform.scale(coin_image, (coin_icon_size, coin_icon_size))
 
 pg.mixer.init()
-background_music = "resource/sounds/background_music.mp3"
-start_music = "resource/sounds/start_game.mp3"
+background_music = "resource/sounds/background.mp3"
 death_music = "resource/sounds/player_death.mp3"
 enemy_spawn_music = "resource/sounds/enemy_spawn.mp3"
 game_over_music = "resource/sounds/game_over.mp3"
-
-
+blood_splatter = "resource/sounds/blood_splatter.mp3"
 
 def load_data():
     grass = pg.image.load("resource/tiles/grass.png").convert_alpha()
