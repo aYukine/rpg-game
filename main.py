@@ -68,6 +68,7 @@ class Game():
         self.map = utils.map_reader("resource/map.csv")
         self.map2 = utils.block_reader("resource/map2.csv")
         self.image_game_over = pg.image.load("resource/img/death.jpg").convert_alpha()
+        self.image_grave = pg.image.load("resource/img/grave.png").convert_alpha()
         self.progress = 60
         self.player_sprite = load_player()
         self.enemy_sprite = load_enemy()
@@ -138,18 +139,20 @@ class Game():
             self.run_death_menu()
 
     def run_death_menu(self):
+        image_width = self.image_grave.get_width()
         pg.mixer.music.pause()
         font = pg.font.Font("resource/font/LilitaOne-Regular.ttf", 50)
 
         options = ["Restart Game", "Quit"]
         option_positions = [
-            (self.screen.get_width() // 2, 300),  
-            (self.screen.get_width() // 2, 400),  
+            (self.screen.get_width() // 2, 450),  
+            (self.screen.get_width() // 2, 550),  
         ]
         selected_index = 0 
 
         while True:
             self.screen.blit(self.image_game_over, (0, 0))
+            self.screen.blit(self.image_grave, ((self.screen.get_width() - image_width) // 2, 50))
             mouse_x, mouse_y = pg.mouse.get_pos()
 
             for event in pg.event.get():
@@ -193,7 +196,7 @@ class Game():
                 self.screen.blit(option_text, (x - option_text.get_width() // 2, y - option_text.get_height() // 2))
 
             death_text = font.render("Game Over", True, WHITE)
-            self.screen.blit(death_text, (self.screen.get_width() // 2 - death_text.get_width() // 2, 150))
+            self.screen.blit(death_text, (self.screen.get_width() // 2 - death_text.get_width() // 2, 300))
 
             pg.display.flip()
             pg.time.delay(100)
