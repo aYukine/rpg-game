@@ -363,27 +363,45 @@ class Game():
         pg.display.flip()
 
     def show_settings(self, key):
-        font = pg.font.Font(None, 40)
-        lines = [
-            "=== Settings ===",
-            f"Volume: {int(self.volume * 100)}%",
-            "Use Arrow Keys to Adjust Volume",
-            "Press ENTER to Return",
-        ]
-        for i, line in enumerate(lines):
-            text_surface = font.render(line, True, WHITE)
-            text_rect = text_surface.get_rect(center=(screenx // 2, screeny // 3 + i * 40))
-            self.screen.blit(text_surface, text_rect)
+        font = pg.font.Font("resource/font/LilitaOne-Regular.ttf", 40)
+        volume_percentage = round(self.volume * 100 / 5) * 5
 
+        title = font.render("Settings Menu", True, WHITE)
+        title_rect = title.get_rect(center=(screenx // 2, screeny // 4))
+        self.screen.blit(title, title_rect)
+    
+        volume_text = font.render(f"Volume: {volume_percentage}%", True, WHITE)
+        volume_rect = volume_text.get_rect(center=(screenx // 2, screeny // 2))
+        self.screen.blit(volume_text, volume_rect)
+    
+        bar_width = 400
+        bar_height = 30
+        bar_x = (screenx - bar_width) // 2
+        bar_y = screeny // 2 + 50
+    
+        pg.draw.rect(self.screen, WHITE, (bar_x, bar_y, bar_width, bar_height), 2)
+    
+        filled_width = (bar_width * volume_percentage) // 100
+        pg.draw.rect(self.screen, WHITE, (bar_x, bar_y, filled_width, bar_height))
+    
+        for i in range(0, 101, 5):
+            marker_x = bar_x + (i * bar_width) // 100
+            marker_height = 20 if i % 20 == 0 else 10
+            pg.draw.line(self.screen, WHITE, (marker_x, bar_y + bar_height), (marker_x, bar_y + bar_height + marker_height))
+            if i % 20 == 0:
+                text = font.render(f"{i}", True, WHITE)
+                text_rect = text.get_rect(center=(marker_x, bar_y + bar_height + 35))
+                self.screen.blit(text, text_rect)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          ~
         if key == pg.K_LEFT:
-            self.volume = max(0, self.volume - 0.05)
+            volume_percentage = max(0, volume_percentage - 5)
+            self.volume = volume_percentage / 100
             pg.mixer.music.set_volume(self.volume)
         elif key == pg.K_RIGHT:
-            self.volume = min(1, self.volume + 0.05)
+            volume_percentage = min(100, volume_percentage + 5)
+            self.volume = volume_percentage / 100
             pg.mixer.music.set_volume(self.volume)
-        elif key == pg.K_RETURN:
-            self.current_screen = 0  # Return to main menu
-
+        elif key == pg.K_ESCAPE:
+            self.current_screen = 0
         pg.display.flip()
 
     def show_shop(self):
@@ -392,10 +410,11 @@ class Game():
     def show_inventory(self):
         pass
 
-    def show_settings(self, key):
-        if key == pg.K_ESCAPE:
-            self.current_screen = 0
-        pg.display.flip()
+    #def show_settings(self, key):
+        
+        # if key == pg.K_ESCAPE:
+        #     self.current_screen = 0
+        # pg.display.flip()
                             
     def show_help(self, key):
         font = pg.font.Font(None, 40)
