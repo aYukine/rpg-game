@@ -49,7 +49,7 @@ class Game():
     def play_background_music(self):
         pg.mixer.music.load(background_music)
         pg.mixer.music.set_volume(self.volume)
-        pg.mixer.music.play(-1, 0.0)  
+        pg.mixer.music.play(-1)  
 
     def play_sound_effect(self, sound_file):
         sound = pg.mixer.Sound(sound_file)
