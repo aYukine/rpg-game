@@ -394,7 +394,7 @@ class Game():
             if i % 20 == 0:
                 text = font.render(f"{i}", True, WHITE)
                 text_rect = text.get_rect(center=(marker_x, bar_y + bar_height + 35))
-                self.screen.blit(text, text_rect)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          ~
+                self.screen.blit(text, text_rect)
         if key == pg.K_LEFT:
             volume_percentage = max(0, volume_percentage - 5)
             self.volume = volume_percentage / 100
@@ -413,11 +413,11 @@ class Game():
     def show_inventory(self):
         pass
 
-    #def show_settings(self, key):
+    # def show_settings(self, key):
         
-        # if key == pg.K_ESCAPE:
-        #     self.current_screen = 0
-        # pg.display.flip()
+    #     if key == pg.K_ESCAPE:
+    #         self.current_screen = 0
+    #     pg.display.flip()
                             
     def show_help(self, key):
         font = pg.font.Font(None, 40)
