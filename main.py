@@ -42,6 +42,8 @@ class Game():
         self.player_coins = 10 
         self.soundtracks = []
         self.volume = 0.5
+        self.level = 1
+        self.xp = 100
 
     def play_background_music(self):
         pg.mixer.music.load(background_music)
@@ -269,6 +271,20 @@ class Game():
 
         self.screen.blit(heart_image, (blood_x - circle_radius, blood_y + blood_bar_height // 2 - circle_radius))
 
+        xp_fill_width = xp_bar_width/self.xp
+        pg.draw.rect(self.screen, WHITE, (xp_x, xp_y, xp_bar_width, xp_bar_height), border_radius=border_radius)
+        pg.draw.rect(
+            self.screen, 
+            Light_Blue1, 
+            (xp_x + 2, xp_y + 2,  xp_bar_width - 4, xp_bar_height - 4), 
+            border_radius=border_radius - 2 
+        )
+        
+        pg.draw.circle(self.screen, WHITE, (xp_x , xp_y + xp_bar_height // 2), circle_radius + 5)
+        font = pg.font.Font("resource/font/LilitaOne-Regular.ttf", 30)
+        level_count_text = font.render(str(self.level), True, BLUE)
+        self.screen.blit(level_count_text, (xp_x - (circle_radius/2), xp_y + xp_bar_height // 2 - (circle_radius+1)))
+    
         self.screen.blit(coin_image, (coin_x, coin_y))
 
         font = pg.font.Font("resource/font/LilitaOne-Regular.ttf", 30)
