@@ -32,15 +32,18 @@ def load_data():
     grassstone7 = pg.image.load("resource/tiles/grassstone7.png").convert_alpha()
     grassstone8 = pg.image.load("resource/tiles/grassstone8.png").convert_alpha()
 
-    water = pg.image.load("resource/tiles/water.png").convert_alpha()
-    watergrass1 = pg.image.load("resource/tiles/watergrass1.png").convert_alpha()
-    watergrass2 = pg.image.load("resource/tiles/watergrass2.png").convert_alpha()
-    watergrass3 = pg.image.load("resource/tiles/watergrass3.png").convert_alpha()
-    watergrass4 = pg.image.load("resource/tiles/watergrass4.png").convert_alpha()
-    watergrass5 = pg.image.load("resource/tiles/watergrass5.png").convert_alpha()
-    watergrass6 = pg.image.load("resource/tiles/watergrass6.png").convert_alpha()
-    watergrass7 = pg.image.load("resource/tiles/watergrass7.png").convert_alpha()
-    watergrass8 = pg.image.load("resource/tiles/watergrass8.png").convert_alpha()
+    wall = pg.image.load("resource/blocks/wall.png").convert_alpha()
+    tree1 = pg.image.load("resource/blocks/tree1.png").convert_alpha()
+    tree2 = pg.image.load("resource/blocks/tree2.png").convert_alpha()
+    water = pg.image.load("resource/blocks/water.png").convert_alpha()
+    watergrass1 = pg.image.load("resource/blocks/watergrass1.png").convert_alpha()
+    watergrass2 = pg.image.load("resource/blocks/watergrass2.png").convert_alpha()
+    watergrass3 = pg.image.load("resource/blocks/watergrass3.png").convert_alpha()
+    watergrass4 = pg.image.load("resource/blocks/watergrass4.png").convert_alpha()
+    watergrass5 = pg.image.load("resource/blocks/watergrass5.png").convert_alpha()
+    watergrass6 = pg.image.load("resource/blocks/watergrass6.png").convert_alpha()
+    watergrass7 = pg.image.load("resource/blocks/watergrass7.png").convert_alpha()
+    watergrass8 = pg.image.load("resource/blocks/watergrass8.png").convert_alpha()
     roof13 = pg.image.load("resource/blocks/roof-13.png").convert_alpha()
     roof14 = pg.image.load("resource/blocks/roof-14.png").convert_alpha()
     roof15 = pg.image.load("resource/blocks/roof-15.png").convert_alpha()
@@ -59,6 +62,10 @@ def load_data():
     roof28 = pg.image.load("resource/blocks/roof-28.png").convert_alpha()
     fence29 = pg.image.load("resource/blocks/fence-29.png").convert_alpha()
     fence30 = pg.image.load("resource/blocks/fence-30.png").convert_alpha()
+    wall1 = pg.image.load("resource/blocks/wall1.png").convert_alpha()
+    wall2 = pg.image.load("resource/blocks/wall2.png").convert_alpha()
+    wall3 = pg.image.load("resource/blocks/wall3.png").convert_alpha()
+    wall4 = pg.image.load("resource/blocks/wall4.png").convert_alpha()
 
     tiles_decoder[1] = grass
     tiles_decoder[2] = stone
@@ -71,6 +78,9 @@ def load_data():
     tiles_decoder[9] = grassstone7
     tiles_decoder[10] = grassstone8
 
+    block_decoder[1] = wall
+    block_decoder[2] = tree1
+    block_decoder[3] = tree2
     block_decoder[4] = water
     block_decoder[5] = watergrass1
     block_decoder[6] = watergrass2
@@ -98,14 +108,14 @@ def load_data():
     block_decoder[28] = roof28
     block_decoder[29] = fence29
     block_decoder[30] = fence30
+    block_decoder[31] = wall1
+    block_decoder[32] = wall2
+    block_decoder[33] = wall3
+    block_decoder[34] = wall4
 
-    wall = pg.image.load("resource/blocks/wall.png").convert_alpha()
-    tree1 = pg.image.load("resource/blocks/tree1.png").convert_alpha()
-    tree2 = pg.image.load("resource/blocks/tree2.png").convert_alpha()
+    
 
-    block_decoder[1] = wall
-    block_decoder[2] = tree1
-    block_decoder[3] = tree2
+    
 
     gun1 = pg.image.load("resource/gun/gun1.png").convert_alpha()
     gun_map[1] = gun1
