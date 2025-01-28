@@ -176,7 +176,7 @@ class Game():
                         text_width = font.size(options[i])[0]
                         text_height = font.size(options[i])[1]
                         if x - text_width // 2 <= mouse_x <= x + text_width // 2 and \
-                            y - text_height // 2 <= mouse_y <= y + text_height // 2:
+                                y - text_height // 2 <= mouse_y <= y + text_height // 2:
                             if i == 0:  
                                 self.restart_game()
                                 pg.mixer.music.unpause()
@@ -184,12 +184,19 @@ class Game():
                             elif i == 1:  
                                 pg.quit()
                                 exit()
+            for i, (x, y) in enumerate(option_positions):
+                text_width = font.size(options[i])[0]
+                text_height = font.size(options[i])[1]
+                if x - text_width // 2 <= mouse_x <= x + text_width // 2 and \
+                        y - text_height // 2 <= mouse_y <= y + text_height // 2:
+                    selected_index = i  # Update selected_index to the hovered option
 
             for i, (x, y) in enumerate(option_positions):
-                text_color = RED if (
-                    x - font.size(options[i])[0] // 2 <= mouse_x <= x + font.size(options[i])[0] // 2 and
-                    y - font.size(options[i])[1] // 2 <= mouse_y <= y + font.size(options[i])[1] // 2
-                ) or i == selected_index else WHITE
+                # Set text color to red if selected, else white
+                if i == selected_index:
+                    text_color = RED
+                else:
+                    text_color = WHITE
 
                 option_text = font.render(options[i], True, text_color)
                 self.screen.blit(option_text, (x - option_text.get_width() // 2, y - option_text.get_height() // 2))
