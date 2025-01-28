@@ -1,2 +1,1 @@
-
-        # pg.draw.circle(self.screen, WHITE, (xp_x, xp_y + xp_bar_height // 2), circle_radius)
+self.gun_shop_npc.draw(self.screen, self.offset_x, self.offset_y)

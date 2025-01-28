@@ -32,8 +32,9 @@ class Game():
         self.image = pg.image.load("resource/img/background.png").convert_alpha()
 
         self.gun = None
-        self.quest_npc = entity.Passive("John", 100, 10, 20, self.offset_x, self.offset_y, None, 50, 108)
-
+        self.gun_shop_npc = entity.Passive("gun2", 100, 10, 20, self.offset_x, self.offset_y, None, 50, 108)
+        self.shop_image = pg.image.load("resource/gun/gun-option.png").convert_alpha()
+        
         self.loaded = False
         self.start = False
         self.menu_option = 0
@@ -44,6 +45,7 @@ class Game():
         self.volume = 0.5
         self.level = 1
         self.xp = 100
+        
 
     def play_background_music(self):
         pg.mixer.music.load(background_music)
@@ -101,17 +103,13 @@ class Game():
         self.player.check_rect_collide_block(self.map2)
         self.controller_handle(dt, key, mouse)
         self.random_spawn_enemy()
-        self.player.process(dt)
+        self.player.process(dt) 
 
         for p in self.projectiles:
             p.move(dt)
             if utils.distant_from_player(p.x, p.y, self.player.x, self.player.y) > 1000:
                 self.projectiles.remove(p)
 
-        if utils.distant_from_player(self.quest_npc.x, self.quest_npc.y, self.player.x, self.player.y) < 200:
-            self.quest_npc.draw_speech(self.screen, "Hello, I am John. I have a quest for.")
-            if key == pg.K_e:
-                self.quest_npc.draw_speech(self.screen, "Thank you for accepting the quest.")
 
         for e in self.enemies:
             e.process(dt)
@@ -244,9 +242,26 @@ class Game():
         self.screen.blit(self.map, (-self.map_offsetx-self.offset_x-width//2, -self.map_offsety-self.offset_y-height//2))
         self.layer2_builder()
         self.player.draw(self.screen, self.offset_x, self.offset_y)
-        self.quest_npc.draw(self.screen, self.offset_x, self.offset_y)
-        if utils.distant_from_player(self.quest_npc.x, self.quest_npc.y, self.player.x, self.player.y) < 200:
-            self.quest_npc.draw_speech(self.screen, "Hello, I am John. I have a quest for you.")
+        self.gun_shop_npc.draw(self.screen, self.offset_x, self.offset_y)
+
+
+         # Gun shop NPC 
+        if utils.distant_from_player(self.gun_shop_npc.x, self.gun_shop_npc.y, self.player.x, self.player.y) < 200:
+            self.gun_shop_npc.draw_speech(self.screen, "Do you want to buy this Gun for 10 coins?\n Press Y to confirm or N to cancel.")
+    
+        # Wait for the next key press
+        for event in pg.event.get():
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_y:  
+                    if self.player_coins >= 10:  
+                        self.player_coins -= 10  
+                        self.gun = gun_map.get(2)  
+                        self.gun_shop_npc.draw_speech(self.screen, "You purchased the Gun!")
+                    else:
+                        self.gun_shop_npc.draw_speech(self.screen, "Not enough coins for Gun!")
+                elif event.key == pg.K_n:  
+                    self.gun_shop_npc.draw_speech(self.screen, "Purchase canceled.")
+        
 
         for e in self.enemies:
             e.draw(self.screen, self.offset_x, self.offset_y)

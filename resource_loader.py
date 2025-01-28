@@ -119,6 +119,11 @@ def load_data():
 
     gun1 = pg.image.load("resource/gun/gun1.png").convert_alpha()
     gun_map[1] = gun1
+    gun2 = pg.image.load("resource/gun/gun2.png").convert_alpha()
+    gun_map[2] = gun2
+    gun3 = pg.image.load("resource/gun/gun3.png").convert_alpha()
+    gun_map[3] = gun3
+    
 
 def load_player():
     player = []
