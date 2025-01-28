@@ -33,7 +33,6 @@ class Game():
 
         self.gun = None
         self.gun_shop_npc = entity.Passive("gun2", 100, 10, 20, self.offset_x, self.offset_y, None, 50, 108)
-        self.shop_image = pg.image.load("resource/gun/gun-option.png").convert_alpha()
         
         self.loaded = False
         self.start = False
