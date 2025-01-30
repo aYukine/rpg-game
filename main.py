@@ -8,6 +8,7 @@ from resource_loader import *
 import threading
 import time
 import random
+from math import sin, cos, radians
 
 pg.init()
 pg.mixer.init()
@@ -27,12 +28,15 @@ class Game():
         self.projectiles = []
         self.enemies = []
         self.progress = 0
-        self.damage = 10
+        self.damage = 5
         
         self.image = pg.image.load("resource/img/background.png").convert_alpha()
 
         self.gun = None
-        self.gun_shop_npc = entity.Passive("gun2", 100, 10, 20, self.offset_x, self.offset_y, None, 50, 108)
+        self.gun_damage_multiplier = 1
+
+        self.quest_npc = None
+        self.quest_dialogue = "Kill 10 slime for 10 coins"
         
         self.loaded = False
         self.start = False
@@ -41,10 +45,12 @@ class Game():
         self.player_inventory = {}
         self.player_coins = 10 
         self.soundtracks = []
-        self.volume = 0.5
+        self.volume = 0.4
         self.level = 1
-        self.xp = 100
-        
+        self.xp = 0
+        self.quest = 10
+        self.npc_active_distance = 50
+        self.quest_completed = 0
 
     def play_background_music(self):
         pg.mixer.music.load(background_music)
@@ -57,11 +63,24 @@ class Game():
         sound.play()
        
     def random_spawn_enemy(self):
-        a = random.randint(0, 300)
+        a = random.randint(0, 100)
         if a == 50 and len(self.enemies) < 10:
             x = random.randint(int(self.player.x-1000), int(self.player.x+1000))
             y = random.randint(int(self.player.y-1000), int(self.player.y+1000))
+            if x > 1700:
+                x = 1700
+            elif x < -600:
+                x = -600
+            if y < -900:
+                y = - 900
+            elif y > 900:
+                y = 900
             if utils.distant_from_player(x, y, self.player.x, self.player.y) > 500:
+                for r in self.map2:
+                    for b in r:
+                        if type(b) == entity.Block:
+                            if b.rect.colliderect(pg.Rect(x-self.offset_x-25, y-self.offset_y-25, 50, 50)):
+                                return
                 self.enemies.append(entity.Enemy("Enemy", 100, x, y, self.offset_x, self.offset_y, self.enemy_sprite, 50, 50))
                 # self.play_sound_effect(enemy_spawn_music)
 
@@ -76,7 +95,13 @@ class Game():
         self.player_sprite = load_player()
         self.enemy_sprite = load_enemy()
         self.player = entity.Player("Player", 200, 0, 0, self.offset_x, self.offset_y, self.player_sprite, 50, 108)
-        self.gun = gun_map.get(1)
+        self.gun_shop_npcs = [entity.Passive("gun1", 100, 1000, -100, self.offset_x, self.offset_y, images_map.get(1), 50, 108),
+                              entity.Passive("gun2", 100, 1100, -100, self.offset_x, self.offset_y, images_map.get(2), 50, 108),
+                              entity.Passive("gun3", 100, 1200, -100, self.offset_x, self.offset_y, images_map.get(3), 50, 108),
+                              ]
+        self.quest_npc = entity.Passive("John", 100, 450, -550, self.offset_x, self.offset_y, images_map.get(4), 50, 108)
+
+        self.gun = images_map.get(1)
         self.progress = 100
         self.play_background_music() 
 
@@ -84,7 +109,11 @@ class Game():
         mx, my = pg.mouse.get_pos()
         x, y = 0, 0
         if mouse:
-            self.projectiles.append(entity.Bullets(self.player.x, self.player.y, utils.find_bullet_vector(self.player.x, self.player.y, mx+self.offset_x, my+self.offset_y)))
+            gun_angle = utils.find_gun_angle((1, 0), (mx-screenx//2, my-screeny//2))
+            gun_angle = radians(gun_angle)
+            gun_start_x = self.player.x + cos(gun_angle)*100
+            gun_start_y = self.player.y + sin(gun_angle)*-100
+            self.projectiles.append(entity.Bullets(gun_start_x, gun_start_y, utils.find_bullet_vector(self.player.x, self.player.y, mx+self.offset_x, my+self.offset_y)))
         press = pg.key.get_pressed()
         if press[pg.K_w]:
             y -= player_speed
@@ -94,9 +123,12 @@ class Game():
             x -= player_speed
         if press[pg.K_d]:
             x += player_speed
-    
+
         self.player.move(x, y, dt)
         self.update_global_xy()
+    
+    def update_damage(self):
+        self.damage = self.level*2 *self.gun_damage_multiplier 
 
     def handle_games(self, dt, key, mouse):
         self.player.check_rect_collide_block(self.map2)
@@ -108,7 +140,6 @@ class Game():
             p.move(dt)
             if utils.distant_from_player(p.x, p.y, self.player.x, self.player.y) > 1000:
                 self.projectiles.remove(p)
-
 
         for e in self.enemies:
             e.process(dt)
@@ -128,9 +159,32 @@ class Game():
             if e.rect.colliderect(self.player.rect):
                 self.player.take_damage(20)
             if e.hp <= 0:
-                self.player_coins += 1
+                self.quest -= 1
+                self.xp += 40
                 self.enemies.remove(e)
 
+        if self.xp >= 100:
+            self.level += 1
+            self.xp %= 100
+            self.update_damage()
+
+        for i, gun_npc in enumerate(self.gun_shop_npcs):
+            if utils.distant_from_player(gun_npc.x, gun_npc.y, self.player.x, self.player.y) < self.npc_active_distance:
+                if key == pg.K_y:
+                    if self.gun == gun_npc.sprite:
+                        pass
+                    elif self.player_coins >= (i+1)*10:
+                        self.player_coins -= (i+1)*10
+                        self.gun = gun_npc.sprite
+                        self.gun_damage_multiplier = 1 + 0.2*i
+                        self.update_damage()
+        
+        if utils.distant_from_player(self.quest_npc.x, self.quest_npc.y, self.player.x, self.player.y) < self.npc_active_distance:
+            if self.quest <= 0:
+                if key == pg.K_y:
+                    self.player_coins += 10
+                    self.quest = (self.quest_completed+1)*20
+        
         if self.player.hp <= 0:
             self.play_sound_effect(death_music)
             self.play_sound_effect(blood_splatter)
@@ -189,7 +243,7 @@ class Game():
                 text_height = font.size(options[i])[1]
                 if x - text_width // 2 <= mouse_x <= x + text_width // 2 and \
                         y - text_height // 2 <= mouse_y <= y + text_height // 2:
-                    selected_index = i  # Update selected_index to the hovered option
+                    selected_index = i  # Update selected_index to the hovered options
 
             for i, (x, y) in enumerate(option_positions):
                 # Set text color to red if selected, else white
@@ -248,26 +302,20 @@ class Game():
         self.screen.blit(self.map, (-self.map_offsetx-self.offset_x-width//2, -self.map_offsety-self.offset_y-height//2))
         self.layer2_builder()
         self.player.draw(self.screen, self.offset_x, self.offset_y)
-        self.gun_shop_npc.draw(self.screen, self.offset_x, self.offset_y)
+        for i, gun_npc in enumerate(self.gun_shop_npcs):
+            gun_npc.draw(self.screen, self.offset_x, self.offset_y)
+                
+            if utils.distant_from_player(gun_npc.x, gun_npc.y, self.player.x, self.player.y) < self.npc_active_distance:
+                gun_npc.draw_speech(self.screen, f"{10*(i+1)} coins, click y to buy")
 
+        self.quest_npc.draw(self.screen, self.offset_x, self.offset_y)
 
-         # Gun shop NPC 
-        if utils.distant_from_player(self.gun_shop_npc.x, self.gun_shop_npc.y, self.player.x, self.player.y) < 200:
-            self.gun_shop_npc.draw_speech(self.screen, "Do you want to buy this Gun for 10 coins?\n Press Y to confirm or N to cancel.")
-    
-        # Wait for the next key press
-        for event in pg.event.get():
-            if event.type == pg.KEYDOWN:
-                if event.key == pg.K_y:  
-                    if self.player_coins >= 10:  
-                        self.player_coins -= 10  
-                        self.gun = gun_map.get(2)  
-                        self.gun_shop_npc.draw_speech(self.screen, "You purchased the Gun!")
-                    else:
-                        self.gun_shop_npc.draw_speech(self.screen, "Not enough coins for Gun!")
-                elif event.key == pg.K_n:  
-                    self.gun_shop_npc.draw_speech(self.screen, "Purchase canceled.")
-        
+        if self.quest <= 0:
+            self.quest_dialogue = f"collect the {10} coins"
+        else:
+            self.quest_dialogue = f"Kill {self.quest} slime for {10} coins"
+        if utils.distant_from_player(self.quest_npc.x, self.quest_npc.y, self.player.x, self.player.y) < self.npc_active_distance:
+            self.quest_npc.draw_speech(self.screen, f"{self.quest_dialogue}")
 
         for e in self.enemies:
             e.draw(self.screen, self.offset_x, self.offset_y)
@@ -292,12 +340,12 @@ class Game():
 
         self.screen.blit(heart_image, (blood_x - circle_radius, blood_y + blood_bar_height // 2 - circle_radius))
 
-        xp_fill_width = xp_bar_width/self.xp
+        xp_fill_width = xp_bar_width * (self.xp / 100)
         pg.draw.rect(self.screen, WHITE, (xp_x, xp_y, xp_bar_width, xp_bar_height), border_radius=border_radius)
         pg.draw.rect(
             self.screen, 
             Light_Blue1, 
-            (xp_x + 2, xp_y + 2,  xp_bar_width - 4, xp_bar_height - 4), 
+            (xp_x + 2, xp_y + 2,  xp_fill_width - 4, xp_bar_height - 4), 
             border_radius=border_radius - 2 
         )
         
@@ -332,7 +380,7 @@ class Game():
             pg.draw.rect(self.screen, WHITE, 
                  (bar_x - border_thickness, bar_y - border_thickness, 
                   bar_width + border_thickness * 2, bar_height + border_thickness * 2), 
-                 border_radius=border_radius)
+                  border_radius=border_radius)
 
             pg.draw.rect(self.screen, Light_Blue, 
                  (bar_x, bar_y, bar_width, bar_height), 
@@ -449,12 +497,6 @@ class Game():
 
     def show_inventory(self):
         pass
-
-    # def show_settings(self, key):
-        
-    #     if key == pg.K_ESCAPE:
-    #         self.current_screen = 0
-    #     pg.display.flip()
                             
     def show_help(self, key):
         font = pg.font.Font(None, 40)
@@ -475,7 +517,7 @@ class Game():
     def mainloop(self):
         loader = threading.Thread(target=self.load_game)
         loader.daemon = True
-        loader.start() #nis ban mok pi na
+        loader.start() 
         while self.run:
             key = None
             mouse = False

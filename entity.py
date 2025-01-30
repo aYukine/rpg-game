@@ -49,7 +49,10 @@ class Entity:
             pg.draw.rect(master, WHITE, (self.x-offsetx-self.width//2, self.y-offsety-self.height, self.width, 10))
             pg.draw.rect(master, RED, (self.x-offsetx-self.width//2+2, self.y-offsety-self.height+1, self.width*(self.hp/self.max_hp)-4, 8))
         if self.sprite:
-            master.blit(self.sprite[self.sprite_index], (self.x-offsetx-self.width//2, self.y-offsety-self.height//2))
+            if type(self.sprite) == list:
+                master.blit(self.sprite[self.sprite_index], (self.x-offsetx-self.width//2, self.y-offsety-self.height//2))
+            else:
+                master.blit(self.sprite, (self.x-offsetx-self.width//2, self.y-offsety-self.height//2))
         else:
             pg.draw.rect(master, RED, (self.x-offsetx-self.width//2, self.y-offsety-self.height//2, self.width, self.height))
 

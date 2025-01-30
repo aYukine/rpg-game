@@ -3,7 +3,7 @@ import pygame as pg
 # tiles
 tiles_decoder = {}
 block_decoder = {}
-gun_map = {}
+images_map = {}
 
 circle_radius = 15 
 heart_image = pg.image.load('resource/img/heart.png')
@@ -111,18 +111,16 @@ def load_data():
     block_decoder[31] = wall1
     block_decoder[32] = wall2
     block_decoder[33] = wall3
-    block_decoder[34] = wall4
-
-    
-
-    
+    block_decoder[34] = wall4    
 
     gun1 = pg.image.load("resource/gun/gun1.png").convert_alpha()
-    gun_map[1] = gun1
+    images_map[1] = gun1
     gun2 = pg.image.load("resource/gun/gun2.png").convert_alpha()
-    gun_map[2] = gun2
+    images_map[2] = gun2
     gun3 = pg.image.load("resource/gun/gun3.png").convert_alpha()
-    gun_map[3] = gun3
+    images_map[3] = gun3
+    NPC = pg.image.load('resource/player/NPC.png').convert_alpha()
+    images_map[4] = NPC
     
 
 def load_player():
