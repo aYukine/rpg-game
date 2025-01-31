@@ -131,15 +131,31 @@ class Game():
         self.damage = self.level*2 *self.gun_damage_multiplier 
 
     def handle_games(self, dt, key, mouse):
+
+        if key == pg.K_ESCAPE:
+            self.current_screen = 0
+            self.start = False
+
         self.player.check_rect_collide_block(self.map2)
         self.controller_handle(dt, key, mouse)
         self.random_spawn_enemy()
         self.player.process(dt) 
-
+        
+        
         for p in self.projectiles:
             p.move(dt)
             if utils.distant_from_player(p.x, p.y, self.player.x, self.player.y) > 1000:
                 self.projectiles.remove(p)
+
+            for row in self.map2:
+                for b in row:
+                    if type(b) == entity.Block:
+                        if b.rect.colliderect(pg.Rect(p.x-self.offset_x-5, p.y-self.offset_y-5, 10, 10)):
+                            try:
+                                self.projectiles.remove(p)
+                                break
+                            except:
+                                pass
 
         for e in self.enemies:
             e.process(dt)
@@ -533,7 +549,6 @@ class Game():
                     key = event.key
                 if event.type == pg.MOUSEBUTTONDOWN:
                     mouse = True
-
             if self.start == False:
                 self.menu(key, mouse)
                 continue
